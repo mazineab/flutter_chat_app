@@ -1,34 +1,80 @@
+import 'package:chat_app/modules/auth/screens/first_steep.dart';
+import 'package:chat_app/modules/auth/screens/second_steep.dart';
+import 'package:chat_app/routes/routes_names.dart';
+import 'package:chat_app/utils/constants/app_colors.dart';
+import 'package:chat_app/widget/dontHaveWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 import '../../../widget/custom_button.dart';
-import '../../../widget/custom_text_field.dart';
 import '../controllers/auth_controller.dart';
 
 class SignupScreen extends StatelessWidget {
   SignupScreen({super.key});
 
-  final AuthController authController=Get.find();
+  final AuthController authController = Get.find();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        margin: EdgeInsets.symmetric(horizontal: MediaQuery.sizeOf(context).width*0.05),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(height:MediaQuery.sizeOf(context).width*0.75),
-              CustomTextField(label: "First Name",controller: authController.firstName),const SizedBox(height: 20,),
-              CustomTextField(label: "Last Name",controller: authController.lastName),const SizedBox(height: 20,),
-              CustomTextField(label: "Email",controller: authController.email),const SizedBox(height: 20,),
-              CustomTextField(label: "Password",controller: authController.password),const SizedBox(height: 20,),
-              CustomButton(text: "Login",onTap: authController.createAccount)
-
-            ],
-          ),
-        ),
+      appBar: AppBar(
+        backgroundColor: AppColors.bgColors,
+        actions: [
+          Donthavewidget(text: "Are you have account ? ", spanText: "Login       ", voidCallback: (){
+            Get.toNamed(RoutesNames.login);
+          })
+        ],
       ),
-    );
+      resizeToAvoidBottomInset: true,
+        body: GetBuilder<AuthController>(builder:(_) =>
+          Form(
+            key: authController.signUpKey,
+            child: Stepper(
+              onStepCancel:(){
+                authController.changeSteep(false);
+              } ,
+              currentStep: authController.currentIndex.value,
+                stepIconBuilder: (stepIndex, stepState) => Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20)
+                      ),
+                      child: Center(
+                        child: Text(
+                          "${stepIndex + 1}",
+                          style: GoogleFonts.nunito(
+                              color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                steps: [
+              Step(
+                  title: Text("Account Setup",
+                      style: GoogleFonts.nunito(
+                          color: Colors.white, fontWeight: FontWeight.bold)),
+                  content: FirstSteep(authController: authController)),
+              Step(
+                  title: Text("Profile Customization",
+                      style: GoogleFonts.nunito(
+                          color: Colors.white, fontWeight: FontWeight.bold)),
+                  content: SecondSteep(authController: authController)),
+            ],
+              controlsBuilder: (context, details) {
+                return Row(
+                  children: [
+                    authController.currentIndex.value==1?TextButton(
+                      onPressed: details.onStepCancel,
+                      child: Text("Back",style:GoogleFonts.nunito(color: Colors.white),),
+                    ):const SizedBox(),
+                    Expanded(child: CustomButton(text: "Next",onTap:(){
+                      authController.changeSteep(true);
+                    })),
+                  ],
+                );
+              },
+            ),
+          ),
+        ));
   }
 }
