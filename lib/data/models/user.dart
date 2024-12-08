@@ -32,8 +32,8 @@ class User {
         lastName: data['lastName'],
         email: data['email'],
         password: data['password'],
-        birthday: data['birthday'],
-        sexe: data['sexe'],
+        birthday: DateTime.parse(data['birthday']),
+        sexe: data['sexe']==Sexe.male.value ?Sexe.male :Sexe.female,
         phoneNumber: data['phoneNumber'],
         profilePicture: data['profilePicture'],
         bio: data['bio']
@@ -53,4 +53,6 @@ class User {
       'bio': bio,
     };
   }
+  
+  
 }

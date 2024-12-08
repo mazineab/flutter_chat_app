@@ -48,6 +48,9 @@ class MainHome extends StatelessWidget {
               onItemSelected: mainHomeController.onTapItem,
         ),
       ),
+      body: Obx((){
+        return mainHomeController.pages[mainHomeController.selectedIndex.value];
+      }),
     );
   }
 }
