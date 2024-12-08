@@ -66,6 +66,7 @@ class AuthController extends GetxController{
   }
 
   Future<void> login() async {
+    DialogLoader.showLoadingDialog();
     try {
       bool isLoggedIn = await authRepositories.login(email.text, password.text);
       if (isLoggedIn) {
@@ -75,6 +76,8 @@ class AuthController extends GetxController{
       }
     } catch (e) {
       CustomSnackBar.showError("Something went wrong");
+    }finally{
+      Get.close(1);
     }
   }
 
@@ -103,7 +106,7 @@ class AuthController extends GetxController{
       if(!next && currentIndex.value==1){
         currentIndex.value--;
       }else{
-        if(next && currentIndex.value==0 && formKey.currentState!.validate()){
+        if(next && currentIndex.value==0 && signUpKey.currentState!.validate()){
           currentIndex.value++;
         }
       }

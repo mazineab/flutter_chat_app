@@ -18,10 +18,10 @@ class SignupScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.bgColors,
+        backgroundColor: Colors.transparent,
         actions: [
           Donthavewidget(text: "Are you have account ? ", spanText: "Login       ", voidCallback: (){
-            Get.toNamed(RoutesNames.login);
+            Get.offNamed(RoutesNames.login);
           })
         ],
       ),

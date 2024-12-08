@@ -63,12 +63,16 @@ class LoginScreen extends StatelessWidget {
                 ),
                 forgetPassword(),
                 const SizedBox(height: 20),
-                CustomButton(text: "Login",onTap: authController.login),
+                CustomButton(text: "Login",onTap:(){
+                  if(authController.formKey.currentState!.validate()){
+                    authController.login();
+                  }
+                } ),
                 const SizedBox(height: 24),
                 buildOrDivider(),
                 const SizedBox(height: 24),
                 Donthavewidget(text: "Don't have an account ? ", spanText: 'Sign Up', voidCallback: (){
-                  Get.toNamed(RoutesNames.signup);
+                  Get.offNamed(RoutesNames.signup);
                 })
               ],
             ),
