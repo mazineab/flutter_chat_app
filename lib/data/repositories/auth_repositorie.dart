@@ -22,9 +22,12 @@ class AuthRepositories implements Authentication{
   }
 
   @override
-  Future<void> logout() {
-    // TODO: implement logout
-    throw UnimplementedError();
+  Future<void> logout() async{
+    try{
+      await firebaseAuth.signOut();
+    }catch(e){
+      throw Exception(e);
+    }
   }
 
   @override
@@ -37,6 +40,7 @@ class AuthRepositories implements Authentication{
       if(userCredential.user!=null){
         DocumentReference documentReference=await firebaseFireStore.collection('users').add(user.toJson());
         user.uid=documentReference.id;
+        await documentReference.update(user.toJson());
         return true;
       }else{
         return false;

@@ -1,11 +1,11 @@
 import 'package:chat_app/routes/routes.dart';
 import 'package:chat_app/routes/routes_names.dart';
 import 'package:chat_app/utils/constants/app_colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'package:toastification/toastification.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,18 +26,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ToastificationWrapper(
-      child: GetMaterialApp(
-        title: 'Flutter Demo',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          scaffoldBackgroundColor: AppColors.bgColors,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
-          useMaterial3: true,
-        ),
-        getPages: Routes.getApp(),
-        initialRoute: RoutesNames.signup,
+    return GetMaterialApp(
+      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        scaffoldBackgroundColor: AppColors.bgColors,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+        useMaterial3: true,
       ),
+      getPages: Routes.getApp(),
+      initialRoute: FirebaseAuth.instance.currentUser == null
+          ? RoutesNames.login
+          : RoutesNames.home,
     );
   }
 }

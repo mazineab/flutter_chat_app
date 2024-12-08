@@ -1,6 +1,7 @@
 import 'package:chat_app/data/models/enums/sexe.dart';
 import 'package:chat_app/data/models/user.dart';
 import 'package:chat_app/data/repositories/auth_repositorie.dart';
+import 'package:chat_app/routes/routes_names.dart';
 import 'package:chat_app/widget/snackBars/snack_bars.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -70,14 +71,15 @@ class AuthController extends GetxController{
     try {
       bool isLoggedIn = await authRepositories.login(email.text, password.text);
       if (isLoggedIn) {
-        CustomSnackBar.showSuccess("Login successful");
+        Get.close(1);
+        Get.offAllNamed(RoutesNames.home);
       } else {
+        Get.close(1);
         CustomSnackBar.showError("Failed to login");
       }
     } catch (e) {
-      CustomSnackBar.showError("Something went wrong");
-    }finally{
       Get.close(1);
+      CustomSnackBar.showError("Something went wrong");
     }
   }
 
