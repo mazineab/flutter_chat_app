@@ -25,6 +25,19 @@ class User {
       this.bio
       });
 
+    User.empty({
+    this.uid = '',
+    this.name = '',
+    this.lastName = '',
+    this.email = '',
+    this.password = '',
+    this.birthday,
+    this.sexe = Sexe.male,
+    this.phoneNumber,
+    this.profilePicture,
+    this.bio,
+  });
+
   factory User.fromJson(Map<String,dynamic> data){
     return User(
         uid: data['uid'],
