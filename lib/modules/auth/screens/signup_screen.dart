@@ -1,7 +1,6 @@
 import 'package:chat_app/modules/auth/screens/first_steep.dart';
 import 'package:chat_app/modules/auth/screens/second_steep.dart';
 import 'package:chat_app/routes/routes_names.dart';
-import 'package:chat_app/utils/constants/app_colors.dart';
 import 'package:chat_app/widget/dontHaveWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

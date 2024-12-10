@@ -50,4 +50,28 @@ class AuthRepositories implements Authentication{
     }
   }
 
+
+  Future<auth_user.User?> getDataOfCurrentUser() async {
+    try {
+      User? user = firebaseAuth.currentUser;
+      if (user != null) {
+        QuerySnapshot userDataSnapshot = await firebaseFireStore
+            .collection('users')
+            .where("id", isEqualTo: user.uid)
+            .get();
+        if (userDataSnapshot.docs.isNotEmpty) {
+          Map<String, dynamic> userData =
+          userDataSnapshot.docs.first.data() as Map<String, dynamic>;
+          auth_user.User me=auth_user.User.fromJson(userData);
+          return me;
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
 }

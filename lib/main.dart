@@ -1,6 +1,7 @@
 import 'package:chat_app/routes/routes.dart';
 import 'package:chat_app/routes/routes_names.dart';
 import 'package:chat_app/utils/constants/app_colors.dart';
+import 'package:chat_app/utils/local_storage/shared_pred_manager.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:get/get.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  await Get.put(SharedPredManager()).init();
   await Firebase.initializeApp(
     options: FirebaseOptions(
         apiKey: dotenv.env['API_KEY']!,

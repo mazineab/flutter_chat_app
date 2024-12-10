@@ -4,8 +4,6 @@ import 'package:chat_app/widget/gender_card.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import '../../../utils/validators/auth_validation.dart';
-import '../../../widget/custom_button.dart';
 import '../../../widget/custom_text_field.dart';
 import '../controllers/auth_controller.dart';
 

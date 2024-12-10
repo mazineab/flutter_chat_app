@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:chat_app/data/models/enums/sexe.dart';
-import 'package:chat_app/data/models/user.dart';
+import 'package:chat_app/data/models/user.dart' as auth_user;
 import 'package:chat_app/data/repositories/auth_repositorie.dart';
 import 'package:chat_app/routes/routes_names.dart';
+import 'package:chat_app/utils/local_storage/shared_pred_manager.dart';
 import 'package:chat_app/widget/snackBars/snack_bars.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,6 +13,7 @@ import '../../../widget/dialogs/dialog_loader.dart';
 
 class AuthController extends GetxController{
   AuthRepositories authRepositories=Get.put(AuthRepositories());
+  final prefs = Get.find<SharedPredManager>();
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> signUpKey = GlobalKey<FormState>();
@@ -40,7 +44,7 @@ class AuthController extends GetxController{
     try {
       DialogLoader.showLoadingDialog();
       bool isCreated = await authRepositories.registerUser(
-        User(
+        auth_user.User(
           uid: '',
           name: firstName.text,
           lastName: lastName.text,
@@ -126,6 +130,22 @@ class AuthController extends GetxController{
     bioController.text='';
     phoneNumController.text='';
     update();
+  }
+
+
+    getDataOfCurrentUser() async {
+    try {
+      final auth_user.User user =
+          await authRepositories.getDataOfCurrentUser() ?? auth_user.User.empty();
+      if (user.uid.isEmpty) {
+        // await logout();
+      } else {
+        prefs.saveString("userData", jsonEncode(user.toJson()));
+      }
+    } catch (e) {
+      CustomSnackBar.showError("Error:$e");
+      // await logout();
+    }
   }
 
 }

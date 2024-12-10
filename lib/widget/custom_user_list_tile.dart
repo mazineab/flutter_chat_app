@@ -1,5 +1,8 @@
 import 'package:chat_app/data/models/user.dart' as usr;
+import 'package:chat_app/modules/current_user_controller.dart';
+import 'package:chat_app/widget/dialogs/send_message_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomUserListTile extends StatelessWidget {
@@ -9,28 +12,25 @@ class CustomUserListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
-
-      },
+      onTap: () {},
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
             Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.grey[300],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(28),
-                child: Image.asset(
-                  'assets/images/user_placeholder.png',
-                  fit: BoxFit.cover,
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey[300],
                 ),
-              )
-            ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: Image.asset(
+                    'assets/images/user_placeholder.png',
+                    fit: BoxFit.cover,
+                  ),
+                )),
             const SizedBox(width: 12),
             // User Info
             Expanded(
@@ -54,10 +54,20 @@ class CustomUserListTile extends StatelessWidget {
                 ],
               ),
             ),
-            TextButton(onPressed: (){}, child: const Text("Send Invitation",style: TextStyle(color: Colors.blueAccent),))
+            TextButton(
+                onPressed: () {
+                  SendMessageDialog.show(context,
+                  sndrUid:Get.find<CurrentUserController>().authUser.value.uid,
+                  rcvrUid: user.uid
+                  );
+                },
+                child: const Text(
+                  "Send Message",
+                  style: TextStyle(color: Colors.blueAccent, fontSize: 13),
+                ))
           ],
         ),
       ),
-    );;
+    );
   }
 }

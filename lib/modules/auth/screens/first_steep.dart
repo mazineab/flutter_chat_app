@@ -4,7 +4,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../utils/validators/auth_validation.dart';
-import '../../../widget/custom_button.dart';
 import '../../../widget/custom_text_field.dart';
 
 class FirstSteep extends StatelessWidget {
