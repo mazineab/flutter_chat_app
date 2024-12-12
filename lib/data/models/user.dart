@@ -2,6 +2,7 @@ import 'enums/sexe.dart';
 
 class User {
   String uid;
+  String docId;
   String name;
   String lastName;
   String email;
@@ -14,6 +15,7 @@ class User {
 
   User({
       required this.uid,
+      required this.docId,
       required this.name,
       required this.lastName,
       required this.email,
@@ -27,6 +29,7 @@ class User {
 
     User.empty({
     this.uid = '',
+      this.docId='',
     this.name = '',
     this.lastName = '',
     this.email = '',
@@ -41,6 +44,7 @@ class User {
   factory User.fromJson(Map<String,dynamic> data){
     return User(
         uid: data['uid'],
+        docId: data['docId'],
         name: data['name'],
         lastName: data['lastName'],
         email: data['email'],
@@ -55,6 +59,7 @@ class User {
   Map<String,dynamic> toJson(){
     return {
       'uid': uid,
+      "docId":docId,
       'name': name,
       'lastName': lastName,
       'email': email,

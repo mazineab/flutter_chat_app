@@ -8,6 +8,6 @@ class HomeBinding extends Bindings {
   void dependencies() {
     Get.put(MainHomeController());
     Get.put(UsersController());
-    Get.lazyPut(() => CurrentUserController());
+    Get.put(CurrentUserController());
   }
 }

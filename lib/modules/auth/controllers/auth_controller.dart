@@ -46,6 +46,7 @@ class AuthController extends GetxController{
       bool isCreated = await authRepositories.registerUser(
         auth_user.User(
           uid: '',
+          docId: '',
           name: firstName.text,
           lastName: lastName.text,
           email: email.text,
@@ -76,6 +77,7 @@ class AuthController extends GetxController{
       bool isLoggedIn = await authRepositories.login(email.text, password.text);
       if (isLoggedIn) {
         Get.close(1);
+        await getDataOfCurrentUser();
         Get.offAllNamed(RoutesNames.home);
       } else {
         Get.close(1);
@@ -135,8 +137,7 @@ class AuthController extends GetxController{
 
     getDataOfCurrentUser() async {
     try {
-      final auth_user.User user =
-          await authRepositories.getDataOfCurrentUser() ?? auth_user.User.empty();
+      final auth_user.User user = await authRepositories.getDataOfCurrentUser() ?? auth_user.User.empty();
       if (user.uid.isEmpty) {
         // await logout();
       } else {

@@ -38,8 +38,9 @@ class AuthRepositories implements Authentication{
           password: user.password,
       );
       if(userCredential.user!=null){
+        user.uid=userCredential.user!.uid;
         DocumentReference documentReference=await firebaseFireStore.collection('users').add(user.toJson());
-        user.uid=documentReference.id;
+        user.docId=documentReference.id;
         await documentReference.update(user.toJson());
         return true;
       }else{
@@ -53,25 +54,34 @@ class AuthRepositories implements Authentication{
 
   Future<auth_user.User?> getDataOfCurrentUser() async {
     try {
-      User? user = firebaseAuth.currentUser;
-      if (user != null) {
-        QuerySnapshot userDataSnapshot = await firebaseFireStore
-            .collection('users')
-            .where("id", isEqualTo: user.uid)
-            .get();
-        if (userDataSnapshot.docs.isNotEmpty) {
-          Map<String, dynamic> userData =
-          userDataSnapshot.docs.first.data() as Map<String, dynamic>;
-          auth_user.User me=auth_user.User.fromJson(userData);
-          return me;
-        } else {
-          return null;
-        }
-      } else {
-        return null;
+      // Get the currently logged-in user
+      final User? currentUser = firebaseAuth.currentUser;
+
+      if (currentUser == null) {
+        return null; // No user logged in
       }
+
+      // Fetch user data from Firestore
+      print("Current User UID: ${currentUser.uid}");
+      QuerySnapshot userDataSnapshot = await firebaseFireStore
+          .collection('users')
+          .where("uid", isEqualTo: currentUser.uid)
+          .get();
+
+      // Check if user data exists
+      if (userDataSnapshot.docs.isNotEmpty) {
+        final Map<String, dynamic> userData =
+        userDataSnapshot.docs.first.data() as Map<String, dynamic>;
+
+        // Map the JSON to your User model
+        return auth_user.User.fromJson(userData);
+      }
+
+      return null; // User data not found
     } catch (e) {
-      throw Exception(e);
+      print('Error fetching user data: $e'); // Log the error for debugging
+      return null; // Return null to handle errors gracefully
     }
   }
+
 }
