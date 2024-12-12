@@ -36,8 +36,8 @@ class Conversation {
       "senderUid": senderUid,
       "receiverUid": receiverUid,
       "isRead": isRead,
-      "createdAt": createdAt,
-      "lastMessageAt": lastMessageAt,
+      "createdAt": createdAt?.toIso8601String(),
+      "lastMessageAt": lastMessageAt?.toIso8601String(),
       "messages": messages,
     };
   }

@@ -29,7 +29,12 @@ class Message {
       'messageContent': messageContent,
       'senderId': senderId,
       'read': isRead,
-      'createAt': createAt,
+      'createAt': createAt?.toIso8601String(),
     };
+  }
+
+  @override
+  String toString() {
+    return 'Message{uid: $uid, messageContent: $messageContent, senderId: $senderId, isRead: $isRead, createAt: $createAt}';
   }
 }

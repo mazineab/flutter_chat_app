@@ -57,8 +57,8 @@ class CustomUserListTile extends StatelessWidget {
             TextButton(
                 onPressed: () {
                   SendMessageDialog.show(context,
-                  sndrUid:Get.find<CurrentUserController>().authUser.value.uid,
-                  rcvrUid: user.uid
+                  sndrUid:Get.find<CurrentUserController>().authUser.value.docId,
+                  rcvrUid: user.docId
                   );
                 },
                 child: const Text(
