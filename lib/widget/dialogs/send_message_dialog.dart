@@ -6,7 +6,7 @@ class SendMessageDialog {
   static Future<void> show(BuildContext context,
       {required String sndrUid, required String rcvrUid}) async {
     TextEditingController messageController = TextEditingController();
-    ChatRepositorie chatRepositorie = Get.put(ChatRepositorie());
+    ChatRepositories chatRepositories = Get.put(ChatRepositories());
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -71,10 +71,10 @@ class SendMessageDialog {
                       onPressed: () {
                         String message = messageController.text.trim();
                         if (message.isNotEmpty) {
-                          chatRepositorie.createConverstion(
+                          chatRepositories.createConversation(
                               sndrUid, rcvrUid, message);
 
-                          // Navigator.of(context).pop();
+                          Navigator.of(context).pop();
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(

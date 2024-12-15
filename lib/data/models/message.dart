@@ -18,8 +18,8 @@ class Message {
       uid: json['uid'],
       messageContent: json['messageContent'],
       senderId: json['senderId'],
-      isRead: json['isRead'],
-      createAt: json['createAt'],
+      isRead: json['read'],
+      createAt: DateTime.parse(json['createAt']),
     );
   }
 
