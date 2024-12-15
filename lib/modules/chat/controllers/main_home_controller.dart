@@ -11,7 +11,7 @@ class MainHomeController extends GetxController{
   AuthRepositories authRepositories=Get.put(AuthRepositories());
 
   final List pages=[
-    const ChatScreen(),
+    ChatScreen(),
     const UsersScreen(),
     const SettingScreen()
   ];
