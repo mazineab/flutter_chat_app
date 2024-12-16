@@ -1,4 +1,5 @@
 import 'package:chat_app/modules/chat/controllers/chat_screen_controller.dart';
+import 'package:chat_app/routes/routes_names.dart';
 import 'package:chat_app/widget/custom_conversation_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,7 +16,13 @@ class ChatScreen extends StatelessWidget {
           child: ListView.builder(
               itemCount: controller.listConversations.length,
               itemBuilder: (context,index){
-                return CustomConversationCard(conversation:controller.listConversations[index]);
+                return GestureDetector(
+                    onTap: (){
+                      controller.setConversation(controller.listConversations[index]);
+                    },
+                    child: CustomConversationCard(
+                    conversation:controller.listConversations[index])
+                );
               }
           ),
         ),

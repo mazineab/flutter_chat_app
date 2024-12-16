@@ -117,4 +117,21 @@ class ChatRepositories {
       throw Exception(e);
     }
   }
+
+  Future<void> markConversationAsRead(Conversation conversation)async{
+    try{
+      CollectionReference collectionReference = _firebaseFirestore.collection("conversations");
+      QuerySnapshot querySnapshot=await collectionReference.doc(conversation.uid)
+          .collection('messages').where('senderId',isNotEqualTo: currentUserController.authUser.value.docId).get();
+      if (querySnapshot.docs.isNotEmpty) {
+        for (var doc in querySnapshot.docs) {
+          await collectionReference.doc(conversation.uid).collection('messages').doc(doc.id).update({
+            'read': true,
+          });
+        }
+      }
+    }catch(e){
+      throw Exception(e);
+    }
+  }
 }

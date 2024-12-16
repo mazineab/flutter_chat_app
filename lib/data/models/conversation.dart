@@ -21,6 +21,16 @@ class Conversation {
     this.participants
   });
 
+  Conversation.empty()
+      : uid = '',
+        senderDocId = '',
+        receiverDocId = '',
+        isRead = false,
+        createdAt = DateTime.now(),
+        lastMessageAt = DateTime.now(),
+        participants = [],
+        messages = [];
+
   factory Conversation.fromJson(Map<String, dynamic> data) {
     return Conversation(
         uid: data['uid'],

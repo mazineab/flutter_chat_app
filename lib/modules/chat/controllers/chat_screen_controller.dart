@@ -3,9 +3,12 @@ import 'package:chat_app/data/repositories/chat_repositorie.dart';
 import 'package:chat_app/widget/snackBars/snack_bars.dart';
 import 'package:get/get.dart';
 
+import '../../../routes/routes_names.dart';
+
 class ChatScreenController extends GetxController{
   ChatRepositories chatRepositories=Get.put(ChatRepositories());
   RxList<Conversation> listConversations=<Conversation>[].obs;
+  Rx<Conversation> conversation=Conversation().obs;
 
   Future fetchConversations()async{
     try{
@@ -16,6 +19,16 @@ class ChatScreenController extends GetxController{
       Exception(e);
      CustomSnackBar.showError("faild to laod conversations");
     }
+  }
+
+  setConversation(Conversation conversationValue){
+    Get.toNamed(RoutesNames.conversationScreen);
+    conversation.value=conversationValue;
+    markConversationAsRead();
+  }
+
+  markConversationAsRead()async{
+    chatRepositories.markConversationAsRead(conversation.value);
   }
 
   @override
