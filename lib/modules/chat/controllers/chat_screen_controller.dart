@@ -17,12 +17,12 @@ class ChatScreenController extends GetxController{
       update();
     }catch(e){
       Exception(e);
-     CustomSnackBar.showError("faild to laod conversations");
+      CustomSnackBar.showError("Failed to load conversations. Please try again.");
     }
   }
 
   setConversation(Conversation conversationValue){
-    Get.toNamed(RoutesNames.conversationScreen);
+    Get.toNamed(RoutesNames.conversationScreen,arguments: {"conversation":conversationValue});
     conversation.value=conversationValue;
     markConversationAsRead();
   }

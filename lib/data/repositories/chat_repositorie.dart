@@ -50,13 +50,25 @@ class ChatRepositories {
     return Conversation.fromJson(querySnapshot.docs.first.data() as Map<String,dynamic>);
   }
 
+  Future<void> sendMessage(Message message,String conversationUid)async {
+    try{
+      CollectionReference conversationsCollection= _firebaseFirestore.collection("conversations");
+      CollectionReference messagesCollection = conversationsCollection.doc(conversationUid).collection("messages");
+      messagesCollection.add(message.toJson()).then((msgDoc)async{
+        await _updateDocumentWithUid(messagesCollection,msgDoc.id);
+      });
+    }catch(e){
+      throw Exception(e);
+    }
+  }
+
   Message _buildMessage(String senderUid, String content) {
     return Message(
       uid: '',
       senderId: senderUid,
       messageContent: content,
       isRead: false,
-      createAt: DateTime.now(),
+      createdAt: Timestamp.fromDate(DateTime.now()),
     );
   }
 
@@ -66,8 +78,8 @@ class ChatRepositories {
       receiverDocId: receiverDocId,
       // messages: [],
       participants: [senderDocId,receiverDocId],
-      createdAt: DateTime.now(),
-      lastMessageAt: DateTime.now(),
+      createdAt : Timestamp.fromDate(DateTime.now()),
+      lastMessageAt : Timestamp.now(),
       isRead: false,
     );
   }
@@ -87,7 +99,7 @@ class ChatRepositories {
       List<Conversation> listConversations = await Future.wait(
         querySnapshot.docs.map((doc) async {
           List<Message> listMessage =
-          await fetchMessageOfConversation(collectionReference, doc);
+          await _fetchMessageOfConversation(collectionReference, doc);
           Map<String, dynamic> conversationData = doc.data() as Map<String, dynamic>;
           conversationData['messages'] = listMessage;
           return Conversation.fromJson(conversationData);
@@ -99,10 +111,21 @@ class ChatRepositories {
     }
   }
   
-  Future<List<Message>> fetchMessageOfConversation(CollectionReference collection,QueryDocumentSnapshot doc)async{
+  Future<List<Message>> _fetchMessageOfConversation(CollectionReference collection,QueryDocumentSnapshot doc)async{
     try{
     QuerySnapshot querySnapshot=await collection.doc(doc.id).collection('messages').get();
     return querySnapshot.docs.map((e)=>Message.fromJson(e.data() as Map<String,dynamic>)).toList();
+    }catch(e){
+      throw Exception(e);
+    }
+  }
+
+  Future<List<Message>> fetchMessageOfConversation(String conversationUid)async{
+    try{
+      CollectionReference collectionReference=_firebaseFirestore.collection("conversations");
+      QuerySnapshot querySnapshot=await collectionReference.doc(conversationUid).collection('messages')
+          .orderBy("createdAt",descending: false).get();
+      return querySnapshot.docs.map((e)=>Message.fromJson(e.data() as Map<String,dynamic>)).toList();
     }catch(e){
       throw Exception(e);
     }

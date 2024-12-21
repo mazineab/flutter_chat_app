@@ -16,7 +16,7 @@ class ChatScreen extends StatelessWidget {
           child: ListView.builder(
               itemCount: controller.listConversations.length,
               itemBuilder: (context,index){
-                return GestureDetector(
+                return InkWell(
                     onTap: (){
                       controller.setConversation(controller.listConversations[index]);
                     },
