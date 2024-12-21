@@ -53,7 +53,7 @@ class CustomConversationController extends GetxController{
 
 
   convertTime(Message message) {
-    String res=timeago.format(message.createAt!,locale: "en",allowFromNow: true);
+    String res=timeago.format(message.createdAt!.toDate(),locale: "en",allowFromNow: true);
     dateTime.value=res;
   }
 

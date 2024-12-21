@@ -1,12 +1,13 @@
 import 'package:chat_app/data/models/message.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Conversation {
   String? uid;
   String? senderDocId;
   String? receiverDocId;
   bool? isRead;                 
-  DateTime? createdAt;          
-  DateTime? lastMessageAt;
+  Timestamp? createdAt;
+  Timestamp? lastMessageAt;
   List<String>? participants;
   List<Message>? messages;
 
@@ -26,8 +27,8 @@ class Conversation {
         senderDocId = '',
         receiverDocId = '',
         isRead = false,
-        createdAt = DateTime.now(),
-        lastMessageAt = DateTime.now(),
+        createdAt = Timestamp.fromDate(DateTime.now()),
+        lastMessageAt = Timestamp.now(),
         participants = [],
         messages = [];
 
@@ -37,8 +38,8 @@ class Conversation {
         senderDocId: data['senderDocId'],
         receiverDocId: data['receiverDocId'],
         isRead: data['isRead'],
-        createdAt: DateTime.parse(data['createdAt']),
-        lastMessageAt: DateTime.parse(data['lastMessageAt']),
+        createdAt: data['createAt'] != null ? data['createAt'] as Timestamp : null,
+        lastMessageAt:data['lastMessageAt'] != null ? data['lastMessageAt'] as Timestamp : null,
         participants: (data["participants"] as List<dynamic>?)?.cast<String>(),
         messages: data['messages'] ?? []);
   }
@@ -49,9 +50,9 @@ class Conversation {
       "senderDocId": senderDocId,
       "receiverDocId": receiverDocId,
       "isRead": isRead,
-      "createdAt": createdAt?.toIso8601String(),
+      "createdAt": createdAt,
       "participants":participants,
-      "lastMessageAt": lastMessageAt?.toIso8601String(),
+      "lastMessageAt": lastMessageAt,
     };
   }
 }
