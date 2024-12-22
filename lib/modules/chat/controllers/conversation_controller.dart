@@ -52,7 +52,7 @@ class ConversationController extends GetxController{
         isRead: false,
         createdAt: Timestamp.fromDate(DateTime.now()),
       );
-      await _chatRepositories.sendMessage(message, conversation.value.uid!);
+      await _chatRepositories.sendMessage(message, conversation.value.uid!,currentUserController.authUser.value.docId==conversation.value.senderDocId);
       textEditingController.clear();
     }catch(e){
       CustomSnackBar.showError("Failed to send your message, please try again.");

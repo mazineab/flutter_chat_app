@@ -9,16 +9,28 @@ class ChatRepositories {
   CurrentUserController currentUserController=Get.find();
 
   Future<void> createConversation(
-      String senderUid, String receiverUid, String messageBody) async {
+      String senderUid, String receiverUid, String messageBody,bool isSender) async {
     try {
       CollectionReference collectionReference =
           _firebaseFirestore.collection("conversations");
       Message message = _buildMessage(senderUid,messageBody);
-      Conversation conversation = _buildConversation(senderUid,receiverUid);
+      String senderFullName=await getUserFullName(senderUid);
+      String receiverFullName=await getUserFullName(receiverUid);
+      Conversation conversation = _buildConversation(
+          senderDocId: senderUid,
+          receiverDocId: receiverUid,
+          senderFullName: senderFullName,
+          receiverFullName: receiverFullName,
+          lastMessageAt: message.createdAt!,
+          lastMessage: message.messageContent!,
+          unreadReceiverCount: isSender? 1 : 0,
+          unreadSenderCount: isSender ? 0:1
+      );
       if(await checkConversationExist(collectionReference)){
-        Conversation conversation=await fetchExistingConversation(collectionReference);
-        CollectionReference messagesCollection=collectionReference.doc(conversation.uid).collection('messages');
+        Conversation existConversation=await fetchExistingConversation(collectionReference);
+        CollectionReference messagesCollection=collectionReference.doc(existConversation.uid).collection('messages');
         messagesCollection.add(message.toJson()).then((msgDoc) async {
+          await updateConversation(existConversation.uid!,conversation,isSender);
           await _updateDocumentWithUid(messagesCollection, msgDoc.id);
         });
       }else{
@@ -50,11 +62,17 @@ class ChatRepositories {
     return Conversation.fromJson(querySnapshot.docs.first.data() as Map<String,dynamic>);
   }
 
-  Future<void> sendMessage(Message message,String conversationUid)async {
+  Future<void> sendMessage(Message message,String conversationUid,bool isSender)async {
     try{
+      Conversation conversation=Conversation(
+        lastMessage:message.messageContent,
+        lastMessageAt: message.createdAt
+      );
+
       CollectionReference conversationsCollection= _firebaseFirestore.collection("conversations");
       CollectionReference messagesCollection = conversationsCollection.doc(conversationUid).collection("messages");
       messagesCollection.add(message.toJson()).then((msgDoc)async{
+        await updateConversation(conversationUid, conversation, isSender);
         await _updateDocumentWithUid(messagesCollection,msgDoc.id);
       });
     }catch(e){
@@ -72,16 +90,44 @@ class ChatRepositories {
     );
   }
 
-  Conversation _buildConversation(String senderDocId, String receiverDocId) {
+  Conversation _buildConversation(
+      {
+        required String senderDocId,
+      required String receiverDocId,
+      required String senderFullName,
+      required String receiverFullName,
+        required Timestamp lastMessageAt,
+        required int unreadSenderCount,
+        required int unreadReceiverCount,
+      required String lastMessage}) {
     return Conversation(
       senderDocId: senderDocId,
+      senderFullName: senderFullName,
+      receiverFullName: receiverFullName,
       receiverDocId: receiverDocId,
-      // messages: [],
       participants: [senderDocId,receiverDocId],
       createdAt : Timestamp.fromDate(DateTime.now()),
-      lastMessageAt : Timestamp.now(),
-      isRead: false,
+      lastMessageAt : lastMessageAt,
+      lastMessage:lastMessage ,
+      unreadReceiverMessages: unreadReceiverCount,
+      unreadSenderMessages: unreadSenderCount
     );
+  }
+
+  Future<void> updateConversation(String docId,Conversation conversation,bool isSender)async {
+    DocumentSnapshot documentSnapshot=await _firebaseFirestore.collection('conversations').doc(docId).get();
+    Conversation existConversation=Conversation.fromJson(documentSnapshot.data() as Map<String,dynamic>);
+    int updatedUnreadMessages = isSender
+        ? (existConversation.unreadReceiverMessages ?? 0) + 1
+        : (existConversation.unreadSenderMessages ?? 0) + 1;
+    _firebaseFirestore.collection("conversations").doc(docId).update(
+        {
+          "lastMessage": conversation.lastMessage,
+          "lastMessageAt": conversation.lastMessageAt,
+          isSender
+              ? "unreadReceiverMessages"
+              :"unreadSenderMessages" :updatedUnreadMessages
+        });
   }
 
   Future<void> _updateDocumentWithUid(
@@ -141,18 +187,13 @@ class ChatRepositories {
     }
   }
 
-  Future<void> markConversationAsRead(Conversation conversation)async{
+  Future<void> markConversationAsRead(Conversation conversation,bool isSender)async{
     try{
-      CollectionReference collectionReference = _firebaseFirestore.collection("conversations");
-      QuerySnapshot querySnapshot=await collectionReference.doc(conversation.uid)
-          .collection('messages').where('senderId',isNotEqualTo: currentUserController.authUser.value.docId).get();
-      if (querySnapshot.docs.isNotEmpty) {
-        for (var doc in querySnapshot.docs) {
-          await collectionReference.doc(conversation.uid).collection('messages').doc(doc.id).update({
-            'read': true,
-          });
-        }
-      }
+      _firebaseFirestore.collection("conversations").doc(conversation.uid).update(
+          isSender
+              ?{"unreadSenderMessages":0}
+              :{"unreadReceiverMessages":0}
+      );
     }catch(e){
       throw Exception(e);
     }
