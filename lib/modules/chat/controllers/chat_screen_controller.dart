@@ -1,11 +1,13 @@
 import 'package:chat_app/data/models/conversation.dart';
 import 'package:chat_app/data/repositories/chat_repositorie.dart';
+import 'package:chat_app/modules/current_user_controller.dart';
 import 'package:chat_app/widget/snackBars/snack_bars.dart';
 import 'package:get/get.dart';
 
 import '../../../routes/routes_names.dart';
 
 class ChatScreenController extends GetxController{
+  CurrentUserController currentUserController=Get.find();
   ChatRepositories chatRepositories=Get.put(ChatRepositories());
   RxList<Conversation> listConversations=<Conversation>[].obs;
   Rx<Conversation> conversation=Conversation().obs;
@@ -28,7 +30,8 @@ class ChatScreenController extends GetxController{
   }
 
   markConversationAsRead()async{
-    chatRepositories.markConversationAsRead(conversation.value);
+    bool isSender=currentUserController.authUser.value.docId==conversation.value.senderDocId;
+    chatRepositories.markConversationAsRead(conversation.value,isSender);
   }
 
   @override

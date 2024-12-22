@@ -1,10 +1,12 @@
 import 'package:chat_app/data/repositories/chat_repositorie.dart';
+import 'package:chat_app/modules/current_user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SendMessageDialog {
   static Future<void> show(BuildContext context,
       {required String sndrUid, required String rcvrUid}) async {
+    bool isSender=Get.find<CurrentUserController>().authUser.value.docId==sndrUid;
     TextEditingController messageController = TextEditingController();
     ChatRepositories chatRepositories = Get.put(ChatRepositories());
     return showDialog<void>(
@@ -72,7 +74,7 @@ class SendMessageDialog {
                         String message = messageController.text.trim();
                         if (message.isNotEmpty) {
                           chatRepositories.createConversation(
-                              sndrUid, rcvrUid, message);
+                              sndrUid, rcvrUid, message,isSender);
 
                           Navigator.of(context).pop();
                         } else {

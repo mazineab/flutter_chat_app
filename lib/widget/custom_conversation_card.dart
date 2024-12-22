@@ -1,23 +1,16 @@
 import 'package:chat_app/data/models/conversation.dart';
-import 'package:chat_app/widget/controllers/custom_conversation_controller.dart';
+import 'package:chat_app/modules/current_user_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class CustomConversationCard extends StatelessWidget {
   final Conversation conversation;
-  CustomConversationCard({super.key, required this.conversation}) {
-    final controller = Get.put(
-      CustomConversationController(),
-      tag: conversation.uid.toString(),
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.initConversation(conversation);
-    });
-  }
+  const CustomConversationCard({super.key, required this.conversation});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<CustomConversationController>(tag: conversation.uid.toString());
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -71,25 +64,22 @@ class CustomConversationCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Obx(()=>
                        Text(
-                        controller.fullName.value,
+                         getFieldFullName(conversation),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ),
-                      Obx(()=>
+
                         Text(
-                          controller.dateTime.value,
+                          getLastMessageTime(conversation.lastMessageAt!),
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
                           ),
                         ),
-                      ),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -99,7 +89,7 @@ class CustomConversationCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        conversation.messages?.last.messageContent ?? '',
+                        conversation.lastMessage ?? '',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey[400],
@@ -108,7 +98,7 @@ class CustomConversationCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    controller.readWidget(conversation.messages??[],context)
+                    readWidget(conversation)
                   ],
                 ),
               ],
@@ -118,6 +108,35 @@ class CustomConversationCard extends StatelessWidget {
       ),
     );
   }
-  
 
+  String getFieldFullName(Conversation conv){
+    CurrentUserController currentUserController=Get.find();
+    return conv.senderDocId==currentUserController.authUser.value.docId ? conv.receiverFullName! : conv.senderFullName!;
+  }
+
+  String getLastMessageTime(Timestamp lastMessageAt)=> timeago.format(lastMessageAt.toDate(),locale: "en",allowFromNow: true);
+
+
+  Widget readWidget(Conversation conv){
+    CurrentUserController currentUserController=Get.find();
+    int notRaed = currentUserController.authUser.value.docId==conv.senderDocId? conv.unreadSenderMessages??0:conv.unreadReceiverMessages??0;
+    return notRaed > 0 ? Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 5,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(Get.context!).primaryColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        notRaed.toString(),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ):const SizedBox();
+  }
 }
