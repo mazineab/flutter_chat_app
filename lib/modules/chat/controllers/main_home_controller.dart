@@ -1,5 +1,5 @@
 import 'package:chat_app/data/repositories/auth_repositorie.dart';
-import 'package:chat_app/modules/chat/screens/chat_screen.dart';
+import 'package:chat_app/modules/chat/screens/conversations_screen.dart';
 import 'package:chat_app/modules/chat/screens/setting_screen.dart';
 import 'package:chat_app/modules/chat/screens/users_screen.dart';
 import 'package:chat_app/routes/routes_names.dart';
@@ -11,7 +11,7 @@ class MainHomeController extends GetxController{
   AuthRepositories authRepositories=Get.put(AuthRepositories());
 
   final List pages=[
-    ChatScreen(),
+    const ConversationsScreen(),
     const UsersScreen(),
     const SettingScreen()
   ];
