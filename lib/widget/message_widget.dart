@@ -15,12 +15,12 @@ class MessageWidget extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
           padding: const EdgeInsets.all(10.0),
           decoration: BoxDecoration(
-            color: isMyMessage ? Colors.red.shade100 : Colors.green.shade100,
+            color: isMyMessage ? Colors.red.withOpacity(0.5) : Colors.green..withOpacity(0.5),
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Text(
             message.messageContent!,
-            style: TextStyle(color: isMyMessage ? Colors.red : Colors.green),
+            style: const TextStyle(color: Colors.white),
           ),
         ),
       ],

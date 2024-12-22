@@ -219,6 +219,19 @@ class ChatRepositories {
       throw Exception(e);
     }
   }
+  StreamSubscription<QuerySnapshot> messagesStream(String conversationUid,{required Function(List<Message>) onData,required Function(Object) onError}){
+    try{
+      CollectionReference collectionReference=_firebaseFirestore.collection("conversations");
+      return collectionReference.doc(conversationUid).collection('messages').orderBy("createdAt",descending: true)
+          .snapshots().listen((querySnapshot){
+        List<Message> listMessages=querySnapshot.docs.map((e)=>Message.fromJson(e.data() as Map<String,dynamic>)).toList();
+        onData(listMessages);
+      });
+    }catch(e){
+      onError(e);
+      throw Exception(e);
+    }
+  }
 
   Future<String> getUserFullName(String docId)async{
     try{

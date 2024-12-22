@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_app/data/models/conversation.dart';
 import 'package:chat_app/data/models/message.dart';
 import 'package:chat_app/data/repositories/chat_repositorie.dart';
@@ -7,9 +9,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ConversationController extends GetxController{
+class ChatController extends GetxController{
   final ChatRepositories _chatRepositories=Get.put(ChatRepositories());
   CurrentUserController currentUserController=Get.find();
+  ScrollController scrollController=ScrollController();
+  StreamSubscription<QuerySnapshot>? streamSubscription;
+
+
   Rx<Conversation> conversation=Conversation().obs;
   List<Message> messages=<Message>[].obs;
   List<Message> myMessages=<Message>[].obs;
@@ -24,6 +30,15 @@ class ConversationController extends GetxController{
       ableToSend.value=false;
     }
     update();
+  }
+
+  void startStream(){
+    streamSubscription=_chatRepositories.messagesStream(conversation.value.uid!, onData: (List<Message> listMessages){
+      messages.assignAll(listMessages);
+      update();
+    },onError: (error){
+      CustomSnackBar.showError("Failed to fetch messages real time. Please try again.");
+    });
   }
 
 
@@ -64,8 +79,18 @@ class ConversationController extends GetxController{
   @override
   void onInit() async{
     await setConversation();
-    await fetchMessages();
+    startStream();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
+    // await fetchMessages();
     super.onInit();
+  }
+
+  void _scrollToBottom() {
+    if (scrollController.hasClients) {
+      scrollController.jumpTo(scrollController.position.minScrollExtent);
+    }
   }
 
   setConversation()async{
