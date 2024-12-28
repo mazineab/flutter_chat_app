@@ -84,4 +84,8 @@ class AuthRepositories implements Authentication{
     }
   }
 
+  Future<void> updateFcmToken(String fcmToken,String userUid)async=>
+    await firebaseFireStore.collection("users").doc(userUid).update({"fcmToken":fcmToken});
+
+
 }

@@ -38,12 +38,13 @@ dependencies:
   google_sign_in: ^6.2.1
   flutter_dotenv: ^5.2.1
   get: ^4.6.6
-  toastification: ^2.3.0
   google_fonts: ^6.2.1
   font_awesome_flutter: ^10.8.0
   flashy_tab_bar2: ^0.0.10
   shared_preferences: ^2.3.3
   timeago: ^3.6.0
+  http: ^1.2.2
+  googleapis_auth: ^1.6.0
 
 
   # The following adds the Cupertino Icons font to your application.
