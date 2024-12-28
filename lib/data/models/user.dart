@@ -12,6 +12,7 @@ class User {
   String? phoneNumber;
   String? profilePicture;
   String? bio;
+  String? fcmToken;
 
   User({
       required this.uid,
@@ -24,7 +25,8 @@ class User {
       required this.sexe,
       this.phoneNumber,
       this.profilePicture,
-      this.bio
+      this.bio,
+      this.fcmToken
       });
 
     User.empty({
@@ -53,7 +55,8 @@ class User {
         sexe: data['sexe']==Sexe.male.value ?Sexe.male :Sexe.female,
         phoneNumber: data['phoneNumber'],
         profilePicture: data['profilePicture'],
-        bio: data['bio']
+        bio: data['bio'],
+        fcmToken: data['fcmToken'],
     );
   }
   Map<String,dynamic> toJson(){
@@ -69,6 +72,7 @@ class User {
       'phoneNumber':phoneNumber,
       'profilePicture': profilePicture,
       'bio': bio,
+      'fcmToken':fcmToken
     };
   }
   

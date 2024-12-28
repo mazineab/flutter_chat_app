@@ -19,5 +19,12 @@ class UsersRepositorie{
     }
   }
 
+  Future<String?> getUserFcmToken(String userUid)async{
+    CollectionReference collectionReference=firebaseFireStore.collection('users');
+    DocumentSnapshot documentSnapshot=await collectionReference.doc(userUid).get();
+    usr.User useer=usr.User.fromJson(documentSnapshot.data() as Map<String,dynamic>);
+    return useer.fcmToken;
+  }
+
 
 }

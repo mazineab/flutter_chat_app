@@ -2,6 +2,7 @@ import 'package:chat_app/routes/routes.dart';
 import 'package:chat_app/routes/routes_names.dart';
 import 'package:chat_app/utils/constants/app_colors.dart';
 import 'package:chat_app/utils/local_storage/shared_pred_manager.dart';
+import 'package:chat_app/utils/services/notification_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,8 @@ void main() async{
         projectId: dotenv.env['projectId']!
     )
   );
+  NotificationService notificationService=Get.put(NotificationService());
+  notificationService.initializeNotifications();
   runApp(const MyApp());
 }
 

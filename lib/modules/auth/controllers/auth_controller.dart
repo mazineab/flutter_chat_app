@@ -5,6 +5,7 @@ import 'package:chat_app/data/models/user.dart' as auth_user;
 import 'package:chat_app/data/repositories/auth_repositorie.dart';
 import 'package:chat_app/routes/routes_names.dart';
 import 'package:chat_app/utils/local_storage/shared_pred_manager.dart';
+import 'package:chat_app/utils/services/notification_service.dart';
 import 'package:chat_app/widget/snackBars/snack_bars.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,7 @@ import '../../../widget/dialogs/dialog_loader.dart';
 
 class AuthController extends GetxController{
   AuthRepositories authRepositories=Get.put(AuthRepositories());
+  NotificationService notificationService=Get.find<NotificationService>();
   final prefs = Get.find<SharedPredManager>();
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -43,6 +45,7 @@ class AuthController extends GetxController{
   Future<void> createAccount() async {
     try {
       DialogLoader.showLoadingDialog();
+      String fcmToken=await notificationService.getFcmToken() ?? '';
       bool isCreated = await authRepositories.registerUser(
         auth_user.User(
           uid: '',
@@ -55,6 +58,7 @@ class AuthController extends GetxController{
           birthday:DateTime.parse(dateController.text),
           bio: bioController.text,
           phoneNumber: phoneNumController.text,
+          fcmToken: fcmToken
         ),
       );
       if (isCreated) {
@@ -141,6 +145,7 @@ class AuthController extends GetxController{
       if (user.uid.isEmpty) {
         // await logout();
       } else {
+        await authRepositories.updateFcmToken(await notificationService.getFcmToken()??'', user.docId);
         prefs.saveString("userData", jsonEncode(user.toJson()));
       }
     } catch (e) {

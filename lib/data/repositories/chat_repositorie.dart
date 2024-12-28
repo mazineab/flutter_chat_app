@@ -10,6 +10,8 @@ class ChatRepositories {
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
   CurrentUserController currentUserController=Get.find();
 
+  /// This function creates a conversation between two users.
+  /// It checks if the conversation already exists to avoid duplication.
   Future<void> createConversation(
       String senderUid, String receiverUid, String messageBody,bool isSender) async {
     try {
@@ -29,7 +31,7 @@ class ChatRepositories {
           unreadSenderCount: isSender ? 0:1
       );
       if(await checkConversationExist(collectionReference,senderUid,receiverUid)){
-        Conversation existConversation=await fetchExistingConversation(collectionReference);
+        Conversation existConversation=await fetchExistingConversation(collectionReference,receiverUid);
         CollectionReference messagesCollection=collectionReference.doc(existConversation.uid).collection('messages');
         messagesCollection.add(message.toJson()).then((msgDoc) async {
           await updateConversation(existConversation.uid!,conversation,isSender);
@@ -50,20 +52,30 @@ class ChatRepositories {
     }
   }
 
+  /// This function checks if a conversation exists or not.
   Future<bool> checkConversationExist(CollectionReference collectionReference,String senderUid,String receiverUid)async{
     QuerySnapshot querySnapshot = await collectionReference
-        .where("participants", arrayContains: [senderUid, receiverUid])
+        .where("participants", arrayContains: senderUid)
         .get();
-    return querySnapshot.docs.isNotEmpty;
+    bool exists = querySnapshot.docs.any((doc) {
+      List<dynamic> participants = doc["participants"];
+      return participants.contains(receiverUid);
+    });
+    return exists;
   }
-
-  Future<Conversation> fetchExistingConversation(CollectionReference collectionReference)async{
+  /// This function fetches an existing conversation.
+  Future<Conversation> fetchExistingConversation(CollectionReference collectionReference,String receiverUid)async{
     QuerySnapshot querySnapshot = await collectionReference
         .where("participants", arrayContains: currentUserController.authUser.value.docId)
         .get();
-    return Conversation.fromJson(querySnapshot.docs.first.data() as Map<String,dynamic>);
+    DocumentSnapshot matchingDocument=querySnapshot.docs.firstWhere((doc) {
+      List<dynamic> participants = doc["participants"];
+      return participants.contains(receiverUid);
+    });
+    return Conversation.fromJson(matchingDocument.data() as Map<String,dynamic>);
   }
 
+  /// This function is used to send a message.
   Future<void> sendMessage(Message message,String conversationUid,bool isSender)async {
     try{
       Conversation conversation=Conversation(
