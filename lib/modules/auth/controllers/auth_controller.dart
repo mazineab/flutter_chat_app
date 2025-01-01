@@ -1,18 +1,24 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:chat_app/data/models/enums/sexe.dart';
 import 'package:chat_app/data/models/user.dart' as auth_user;
 import 'package:chat_app/data/repositories/auth_repositorie.dart';
 import 'package:chat_app/routes/routes_names.dart';
+import 'package:chat_app/services/image_picker_service.dart';
+import 'package:chat_app/services/storage_service.dart';
 import 'package:chat_app/utils/local_storage/shared_pred_manager.dart';
 import 'package:chat_app/utils/services/notification_service.dart';
 import 'package:chat_app/widget/snackBars/snack_bars.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+
 import '../../../widget/dialogs/dialog_loader.dart';
 
 class AuthController extends GetxController{
+  final ImagePickerService imagePicker=Get.put(ImagePickerService());
+  StorageService storageService=Get.put(StorageService());
   AuthRepositories authRepositories=Get.put(AuthRepositories());
   NotificationService notificationService=Get.find<NotificationService>();
   final prefs = Get.find<SharedPredManager>();
@@ -59,7 +65,7 @@ class AuthController extends GetxController{
           bio: bioController.text,
           phoneNumber: phoneNumController.text,
           fcmToken: fcmToken
-        ),
+        ),rxFile.value
       );
       if (isCreated) {
         CustomSnackBar.showSuccess("Account created successfully");
@@ -151,6 +157,18 @@ class AuthController extends GetxController{
     } catch (e) {
       CustomSnackBar.showError("Error:$e");
       // await logout();
+    }
+  }
+  Rx<File?> rxFile = Rx<File?>(null);
+  pickProfileImage()async{
+    try{
+      File? file=await imagePicker.loadFromGallery();
+      rxFile.value=file;
+    }catch(e){
+      print(e);
+      CustomSnackBar.showError("Failed to load the image. Please try again.");
+    }finally{
+      update();
     }
   }
 

@@ -17,7 +17,10 @@ class SecondSteep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CustomProfile(),
+          GestureDetector(
+              onTap: ()=>authController.pickProfileImage(),
+              child: CustomProfile(file: authController.rxFile.value,)
+          ),
           const SizedBox(height: 20,),
           CustomTextField(
             label: "Birthday",controller: authController.dateController,

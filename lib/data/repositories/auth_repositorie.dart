@@ -1,11 +1,16 @@
+import 'dart:io';
+
 import 'package:chat_app/data/models/authentication.dart';
 import 'package:chat_app/data/models/user.dart' as auth_user;
+import 'package:chat_app/services/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 
 class AuthRepositories implements Authentication{
   FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   FirebaseFirestore firebaseFireStore=FirebaseFirestore.instance;
+  final StorageService _storageService=Get.put(StorageService());
 
   @override
   Future<bool> login(String email, String password)async {
@@ -31,7 +36,7 @@ class AuthRepositories implements Authentication{
   }
 
   @override
-  Future<bool> registerUser(auth_user.User user)async {
+  Future<bool> registerUser(auth_user.User user,File? image)async {
     try{
       UserCredential userCredential=await firebaseAuth.createUserWithEmailAndPassword(
           email: user.email,
@@ -41,6 +46,10 @@ class AuthRepositories implements Authentication{
         user.uid=userCredential.user!.uid;
         DocumentReference documentReference=await firebaseFireStore.collection('users').add(user.toJson());
         user.docId=documentReference.id;
+        if(image!=null){
+          String path=await _storageService.uploadProfileImage(documentReference.id, image);
+          user.profilePicture=path;
+        }
         await documentReference.update(user.toJson());
         return true;
       }else{
@@ -54,33 +63,26 @@ class AuthRepositories implements Authentication{
 
   Future<auth_user.User?> getDataOfCurrentUser() async {
     try {
-      // Get the currently logged-in user
       final User? currentUser = firebaseAuth.currentUser;
 
       if (currentUser == null) {
-        return null; // No user logged in
+        return null;
       }
-
-      // Fetch user data from Firestore
-      print("Current User UID: ${currentUser.uid}");
       QuerySnapshot userDataSnapshot = await firebaseFireStore
           .collection('users')
           .where("uid", isEqualTo: currentUser.uid)
           .get();
-
-      // Check if user data exists
       if (userDataSnapshot.docs.isNotEmpty) {
         final Map<String, dynamic> userData =
         userDataSnapshot.docs.first.data() as Map<String, dynamic>;
 
-        // Map the JSON to your User model
         return auth_user.User.fromJson(userData);
       }
 
-      return null; // User data not found
+      return null;
     } catch (e) {
-      print('Error fetching user data: $e'); // Log the error for debugging
-      return null; // Return null to handle errors gracefully
+      print('Error fetching user data: $e');
+      return null;
     }
   }
 
