@@ -45,6 +45,7 @@ dependencies:
   timeago: ^3.6.0
   http: ^1.2.2
   googleapis_auth: ^1.6.0
+  lottie: ^3.0.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -77,6 +78,7 @@ flutter:
   assets:
     - .env
     - assets/images/
+    - assets/animations/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

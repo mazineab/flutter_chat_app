@@ -15,10 +15,12 @@ class ConversationsController extends GetxController{
   RxList<Conversation> listConversations=<Conversation>[].obs;
   Rx<Conversation> conversation=Conversation().obs;
   StreamSubscription<QuerySnapshot>? streamSubscription;
+  RxBool isLoad=false.obs;
 
   Future fetchConversations()async{
     try{
       List<Conversation> conversations=await _chatRepositories.fetchConversations();
+      conversations.sort((a,b)=>b.lastMessageAt!.compareTo(a.lastMessageAt!));
       listConversations.assignAll(conversations);
       update();
     }catch(e){
@@ -39,15 +41,25 @@ class ConversationsController extends GetxController{
   }
 
   void startListing(){
-    streamSubscription=_chatRepositories.conversationStream(
-        onData: (List<Conversation> conversations){
-          listConversations.assignAll(conversations);
-          update();
-        },
-        onError: (error){
-          CustomSnackBar.showError("Failed to load realtime conversations. Please try again.");
-        }
-    );
+    try{
+      isLoad.value=true;
+      streamSubscription=_chatRepositories.conversationStream(
+          onData: (List<Conversation> conversations){
+            conversations.sort((a,b)=>b.lastMessageAt!.compareTo(a.lastMessageAt!));
+            listConversations.assignAll(conversations);
+            isLoad.value=false;
+            update();
+          },
+          onError: (error){
+            CustomSnackBar.showError("Failed to load realtime conversations. Please try again.");
+          }
+      );
+    }catch(e){
+      throw Exception(e);
+    }finally{
+
+    }
+
   }
 
   @override

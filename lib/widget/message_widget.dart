@@ -1,4 +1,5 @@
 import 'package:chat_app/data/models/message.dart';
+import 'package:chat_app/utils/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class MessageWidget extends StatelessWidget {
@@ -11,19 +12,24 @@ class MessageWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-          padding: const EdgeInsets.all(10.0),
-          decoration: BoxDecoration(
-            color: isMyMessage ? Colors.red.withOpacity(0.5) : Colors.green..withOpacity(0.5),
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: Text(
-            message.messageContent!,
-            style: const TextStyle(color: Colors.white),
+        Flexible(
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.sizeOf(context).width-80
+            ),
+            margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+            padding: const EdgeInsets.all(10.0),
+            decoration: BoxDecoration(
+              color: isMyMessage ? AppColors.myMessageColor.withOpacity(0.5) : AppColors.friendMessageColor,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Text(
+              message.messageContent!,
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ),
       ],
-    );;
+    );
   }
 }
