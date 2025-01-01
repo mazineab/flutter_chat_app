@@ -13,6 +13,8 @@ class Conversation {
   int? unreadSenderMessages;
   int? unreadReceiverMessages;
   String? lastMessage;
+  String? senderProfilePicture;
+  String? receiverProfilePicture;
 
   Conversation({
     this.uid,
@@ -25,7 +27,9 @@ class Conversation {
     this.participants,
     this.unreadSenderMessages,
     this.unreadReceiverMessages,
-    this.lastMessage
+    this.lastMessage,
+    this.senderProfilePicture,
+    this.receiverProfilePicture
 
   });
 
@@ -49,7 +53,10 @@ class Conversation {
         participants: (data["participants"] as List<dynamic>?)?.cast<String>(),
         unreadSenderMessages: data['unreadSenderMessages'],
         unreadReceiverMessages: data['unreadReceiverMessages'],
-        lastMessage: data['lastMessage']);
+        lastMessage: data['lastMessage'],
+        senderProfilePicture:data['senderProfilePicture'],
+        receiverProfilePicture: data['receiverProfilePicture']
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -65,6 +72,8 @@ class Conversation {
       "unreadSenderMessages":unreadSenderMessages,
       "unreadReceiverMessages":unreadReceiverMessages,
       "lastMessageAt": lastMessageAt,
+      'senderProfilePicture':senderProfilePicture,
+      'receiverProfilePicture':receiverProfilePicture
     };
   }
 }

@@ -19,7 +19,10 @@ class ChatRepositories {
           _firebaseFirestore.collection("conversations");
       Message message = _buildMessage(senderUid,messageBody);
       String senderFullName=await getUserFullName(senderUid);
+      String senderProfilePicture=await getUserProfile(senderUid);
       String receiverFullName=await getUserFullName(receiverUid);
+      String receiverProfilePicture=await getUserProfile(receiverUid);
+
       Conversation conversation = _buildConversation(
           senderDocId: senderUid,
           receiverDocId: receiverUid,
@@ -28,7 +31,9 @@ class ChatRepositories {
           lastMessageAt: message.createdAt!,
           lastMessage: message.messageContent!,
           unreadReceiverCount: isSender? 1 : 0,
-          unreadSenderCount: isSender ? 0:1
+          unreadSenderCount: isSender ? 0:1,
+          senderProfilePicture: senderProfilePicture,
+        receiverProfilePicture: receiverProfilePicture
       );
       if(await checkConversationExist(collectionReference,senderUid,receiverUid)){
         Conversation existConversation=await fetchExistingConversation(collectionReference,receiverUid);
@@ -113,7 +118,10 @@ class ChatRepositories {
         required Timestamp lastMessageAt,
         required int unreadSenderCount,
         required int unreadReceiverCount,
-      required String lastMessage}) {
+        required String lastMessage,
+        required String senderProfilePicture,
+        required String receiverProfilePicture,
+      }) {
     return Conversation(
       senderDocId: senderDocId,
       senderFullName: senderFullName,
@@ -124,7 +132,9 @@ class ChatRepositories {
       lastMessageAt : lastMessageAt,
       lastMessage:lastMessage ,
       unreadReceiverMessages: unreadReceiverCount,
-      unreadSenderMessages: unreadSenderCount
+      unreadSenderMessages: unreadSenderCount,
+      senderProfilePicture: senderProfilePicture,
+      receiverProfilePicture: receiverProfilePicture
     );
   }
 
@@ -253,6 +263,17 @@ class ChatRepositories {
     }catch(e){
       throw Exception(e);
     }
+  }
+
+  Future<String> getUserProfile(String docId)async{
+    try{
+      CollectionReference collectionReference=_firebaseFirestore.collection('users');
+      QuerySnapshot querySnapshot=await collectionReference.where('docId',isEqualTo: docId).get();
+      return querySnapshot.docs.first['profilePicture'] ?? '';
+    }catch(e){
+      throw Exception(e);
+    }
+
   }
 
   Future<void> markConversationAsRead(Conversation conversation,bool isSender)async{

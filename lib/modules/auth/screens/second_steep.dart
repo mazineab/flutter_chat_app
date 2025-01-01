@@ -19,7 +19,7 @@ class SecondSteep extends StatelessWidget {
         children: [
           GestureDetector(
               onTap: ()=>authController.pickProfileImage(),
-              child: CustomProfile(file: authController.rxFile.value,)
+              child: CustomProfile(path: authController.rxFile.value?.path ?? '',)
           ),
           const SizedBox(height: 20,),
           CustomTextField(
