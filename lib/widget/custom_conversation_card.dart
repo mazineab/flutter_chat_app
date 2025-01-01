@@ -56,7 +56,6 @@ class CustomConversationCard extends StatelessWidget {
 
 
           const SizedBox(width: 12),
-          // User Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,7 +64,7 @@ class CustomConversationCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                        Text(
-                         getFieldFullName(conversation),
+                         getFriendFullName(conversation),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -109,7 +108,7 @@ class CustomConversationCard extends StatelessWidget {
     );
   }
 
-  String getFieldFullName(Conversation conv){
+  String getFriendFullName(Conversation conv){
     CurrentUserController currentUserController=Get.find();
     return conv.senderDocId==currentUserController.authUser.value.docId ? conv.receiverFullName! : conv.senderFullName!;
   }
@@ -128,6 +127,10 @@ class CustomConversationCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(Get.context!).primaryColor,
         borderRadius: BorderRadius.circular(20),
+        image: const DecorationImage(
+          fit: BoxFit.fill,
+            image: AssetImage("assets/images/bg.gif")
+        )
       ),
       child: Text(
         notRaed.toString(),

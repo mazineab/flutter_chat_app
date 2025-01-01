@@ -25,6 +25,7 @@ class ChatController extends GetxController{
   List<Message> friendMessages=<Message>[].obs;
   TextEditingController textEditingController=TextEditingController();
   RxBool ableToSend=false.obs;
+  RxString friendFullName=''.obs;
 
   checkTextField(){
     if(textEditingController.text.isNotEmpty){
@@ -90,8 +91,11 @@ class ChatController extends GetxController{
       CustomSnackBar.showError("Failed to send your message, please try again.");
       Exception(e);
     }
-
   }
+
+  String getFriendFullName(Conversation conv)=>
+    conv.senderDocId==currentUserController.authUser.value.docId ? conv.receiverFullName! : conv.senderFullName!;
+
 
   @override
   void onInit() async{
@@ -112,5 +116,6 @@ class ChatController extends GetxController{
 
   setConversation()async{
     conversation.value=Get.arguments["conversation"];
+    friendFullName.value=getFriendFullName(conversation.value);
   }
 }
