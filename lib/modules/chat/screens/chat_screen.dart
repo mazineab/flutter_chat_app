@@ -43,7 +43,10 @@ class ChatScreen extends StatelessWidget {
                     controller.textEditingController,
                     controller.ableToSend.value,
                     controller.checkTextField,
-                    controller.sendMessage)
+                    controller.sendMessage,
+                    controller.uploadFromGallery
+
+                )
               ],
             ));
           }
@@ -51,8 +54,7 @@ class ChatScreen extends StatelessWidget {
   }
 
   Widget messagePart(TextEditingController textController, bool enable,
-      VoidCallback onChange,
-  Future<void> Function() onTap) {
+      VoidCallback onChange, Future<void> Function() onTap,VoidCallback onCameraTap) {
     return Container(
       width: double.infinity,
       height: 50,
@@ -61,7 +63,7 @@ class ChatScreen extends StatelessWidget {
           color: AppColors.myMessageColor.withOpacity(0.3), borderRadius: BorderRadius.circular(50)),
       child: Row(
         children: [
-          iconWidget((){},Icons.camera_alt),
+          iconWidget(onCameraTap,Icons.camera_alt),
           const SizedBox(width: 5),
           Expanded(
               child: Padding(

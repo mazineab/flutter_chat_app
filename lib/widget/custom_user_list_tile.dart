@@ -1,5 +1,6 @@
 import 'package:chat_app/data/models/user.dart' as usr;
 import 'package:chat_app/modules/current_user_controller.dart';
+import 'package:chat_app/widget/custom_profile.dart';
 import 'package:chat_app/widget/dialogs/send_message_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,20 +18,7 @@ class CustomUserListTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
-            Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey[300],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28),
-                  child: Image.asset(
-                    'assets/images/user_placeholder.png',
-                    fit: BoxFit.cover,
-                  ),
-                )),
+            CustomProfile(path: user.profilePicture??'',picker: false),
             const SizedBox(width: 12),
             // User Info
             Expanded(

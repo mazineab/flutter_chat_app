@@ -1,5 +1,6 @@
 import 'package:chat_app/data/models/conversation.dart';
 import 'package:chat_app/modules/current_user_controller.dart';
+import 'package:chat_app/widget/custom_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,21 +18,10 @@ class CustomConversationCard extends StatelessWidget {
         children: [
           Stack(
             children: [
-              Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey[300],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(28),
-                    child: Image.asset(
-                      'assets/images/user_placeholder.png',
-                      fit: BoxFit.cover,
-                    ),
-                  )
-              ),
+              CustomProfile(
+                path: getFriendProfile(conversation),
+                picker: false,
+              )
 
               /// online part
               // if (true)
@@ -111,6 +101,11 @@ class CustomConversationCard extends StatelessWidget {
   String getFriendFullName(Conversation conv){
     CurrentUserController currentUserController=Get.find();
     return conv.senderDocId==currentUserController.authUser.value.docId ? conv.receiverFullName! : conv.senderFullName!;
+  }
+
+  String getFriendProfile(Conversation conv){
+    CurrentUserController currentUserController=Get.find();
+    return conv.senderDocId==currentUserController.authUser.value.docId ? conv.receiverProfilePicture ?? '' : conv.senderProfilePicture??'';
   }
 
   String getLastMessageTime(Timestamp lastMessageAt)=> timeago.format(lastMessageAt.toDate(),locale: "en",allowFromNow: true);
