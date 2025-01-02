@@ -32,4 +32,13 @@ class StorageService extends GetxService {
       throw Exception("Failed to upload profile image");
     }
   }
+
+  Future<String> uploadImageInConversation(String conversationUid,File image)async{
+    try{
+      return await uploadImage("conversations/$conversationUid/${image.path}", image);
+    }catch(e){
+      print("Error: $e");
+      throw Exception(e);
+    }
+  }
 }

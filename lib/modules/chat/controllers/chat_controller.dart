@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:chat_app/data/models/conversation.dart';
+import 'package:chat_app/data/models/enums/message_type.dart';
 import 'package:chat_app/data/models/message.dart';
 import 'package:chat_app/data/repositories/chat_repositorie.dart';
 import 'package:chat_app/data/repositories/users_repositorie.dart';
 import 'package:chat_app/modules/current_user_controller.dart';
+import 'package:chat_app/services/image_picker_service.dart';
+import 'package:chat_app/services/storage_service.dart';
 import 'package:chat_app/utils/services/notification_service.dart';
 import 'package:chat_app/widget/snackBars/snack_bars.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,11 +16,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ChatController extends GetxController{
+  final ImagePickerService imagePickerService=Get.put(ImagePickerService());
+  final StorageService _storageService=Get.put(StorageService());
   final UsersRepositorie _usersRepositories=Get.put(UsersRepositorie());
   final ChatRepositories _chatRepositories=Get.put(ChatRepositories());
   CurrentUserController currentUserController=Get.find();
   ScrollController scrollController=ScrollController();
   StreamSubscription<QuerySnapshot>? streamSubscription;
+  Rx<File?> rxFile=Rx<File?>(null);
 
 
   Rx<Conversation> conversation=Conversation().obs;
@@ -67,10 +74,19 @@ class ChatController extends GetxController{
     try{
       Message message=Message(
         senderId: currentUserController.authUser.value.docId,
-        messageContent: textEditingController.text,
         isRead: false,
         createdAt: Timestamp.fromDate(DateTime.now()),
       );
+      if(textEditingController.text.isNotEmpty){
+        message.messageType=MessageType.text;
+        message.messageContent=textEditingController.text;
+      }else if(textEditingController.text.isEmpty && rxFile.value!=null){
+        String path=await _storageService.uploadImageInConversation(conversation.value.uid!,rxFile.value!);
+        message.messageType=MessageType.image;
+        message.messageContent="Photo";
+        message.path=path;
+      }
+
       bool isSender=currentUserController.authUser.value.docId==conversation.value.senderDocId;
       await _chatRepositories.sendMessage(message, conversation.value.uid!,isSender);
       textEditingController.clear();
@@ -91,6 +107,17 @@ class ChatController extends GetxController{
       CustomSnackBar.showError("Failed to send your message, please try again.");
       Exception(e);
     }
+  }
+
+  void uploadFromGallery()async{
+    File? file =await imagePickerService.loadFromGallery();
+    if(file!=null){
+      rxFile.value=file;
+      await sendMessage();
+    }else{
+      return;
+    }
+    update();
   }
 
   String getFriendFullName(Conversation conv)=>
