@@ -99,6 +99,17 @@ class ChatRepositories {
     }
   }
 
+  Future<void> updateMessagePath(String conversationUid,String messageUid,String newPath)async{
+    try{
+      CollectionReference conversationsCollection= _firebaseFirestore.collection("conversations");
+      CollectionReference messagesCollection = conversationsCollection.doc(conversationUid).collection("messages");
+      DocumentReference documentReference=messagesCollection.doc(messageUid);
+      await documentReference.update({"path":newPath});
+    }catch(e){
+      throw Exception(e);
+    }
+  }
+
   Message _buildMessage(String senderUid, String content) {
     return Message(
       uid: '',

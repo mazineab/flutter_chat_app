@@ -81,14 +81,17 @@ class ChatController extends GetxController{
         message.messageType=MessageType.text;
         message.messageContent=textEditingController.text;
       }else if(textEditingController.text.isEmpty && rxFile.value!=null){
-        String path=await _storageService.uploadImageInConversation(conversation.value.uid!,rxFile.value!);
         message.messageType=MessageType.image;
         message.messageContent="Photo";
-        message.path=path;
+        message.path=rxFile.value?.path;
       }
 
       bool isSender=currentUserController.authUser.value.docId==conversation.value.senderDocId;
       await _chatRepositories.sendMessage(message, conversation.value.uid!,isSender);
+      if(message.messageType==MessageType.image){
+        String path=await _storageService.uploadImageInConversation(conversation.value.uid!,rxFile.value!);
+        await _chatRepositories.updateMessagePath(conversation.value.uid!,messages.first.uid!,path);
+      }
       textEditingController.clear();
       String? fcmToken=await _usersRepositories.getUserFcmToken(isSender
           ?conversation.value.receiverDocId ?? ''

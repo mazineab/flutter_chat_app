@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/data/models/enums/message_type.dart';
 import 'package:chat_app/data/models/message.dart';
@@ -52,7 +54,10 @@ class MessageWidget extends StatelessWidget {
             width: 5,
         ),
         borderRadius: const BorderRadius.only(topLeft: Radius.circular(12),bottomLeft:Radius.circular(15),topRight: Radius.circular(15)),
-        image: DecorationImage(image: CachedNetworkImageProvider(message.path!),fit: BoxFit.cover)
+        image: DecorationImage(image:message.path!.startsWith('https')
+            ?CachedNetworkImageProvider(message.path!)
+            :FileImage(File(message.path!))
+            ,fit: BoxFit.cover)
       ),
     );
   }
