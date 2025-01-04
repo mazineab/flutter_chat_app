@@ -7,6 +7,7 @@ import 'package:chat_app/data/models/message.dart';
 import 'package:chat_app/data/repositories/chat_repositorie.dart';
 import 'package:chat_app/data/repositories/users_repositorie.dart';
 import 'package:chat_app/modules/current_user_controller.dart';
+import 'package:chat_app/services/audio_service.dart';
 import 'package:chat_app/services/image_picker_service.dart';
 import 'package:chat_app/services/storage_service.dart';
 import 'package:chat_app/utils/services/notification_service.dart';
@@ -24,6 +25,7 @@ class ChatController extends GetxController{
   ScrollController scrollController=ScrollController();
   StreamSubscription<QuerySnapshot>? streamSubscription;
   Rx<File?> rxFile=Rx<File?>(null);
+
 
 
   Rx<Conversation> conversation=Conversation().obs;
@@ -84,12 +86,19 @@ class ChatController extends GetxController{
         message.messageType=MessageType.image;
         message.messageContent="Photo";
         message.path=rxFile.value?.path;
+      }else if(textEditingController.text.isEmpty && rxAudio.value!=null){
+        message.messageType=MessageType.audio;
+        message.messageContent="Audio";
+        message.path=rxAudio.value?.path;
       }
 
       bool isSender=currentUserController.authUser.value.docId==conversation.value.senderDocId;
       await _chatRepositories.sendMessage(message, conversation.value.uid!,isSender);
       if(message.messageType==MessageType.image){
         String path=await _storageService.uploadImageInConversation(conversation.value.uid!,rxFile.value!);
+        await _chatRepositories.updateMessagePath(conversation.value.uid!,messages.first.uid!,path);
+      }else if(message.messageType==MessageType.audio){
+        String path=await _storageService.uploadAudioInConversation(conversation.value.uid!,rxAudio.value!,messages.first.uid!);
         await _chatRepositories.updateMessagePath(conversation.value.uid!,messages.first.uid!,path);
       }
       textEditingController.clear();
@@ -148,4 +157,62 @@ class ChatController extends GetxController{
     conversation.value=Get.arguments["conversation"];
     friendFullName.value=getFriendFullName(conversation.value);
   }
+
+
+
+  /// TODO parts of audio recording and playback functionality
+  Rx<File?> rxAudio=Rx<File?>(null);
+  var isRecording=false.obs;
+  var isAudioPlaying=false.obs;
+  var currentAudioPath=''.obs;
+  startAudioRecording()async {
+    try {
+      AudioService audioService = Get.put(AudioService());
+      isRecording.value = true;
+      await audioService.handleRecord();
+      update();
+    } catch (e) {
+      Exception(e);
+    }
+  }
+
+
+  finishAudioRecording()async{
+    try{
+      AudioService audioService = Get.find();
+      File? audioFile=await audioService.stopRecording();
+      if(audioFile!=null){
+        rxAudio.value=audioFile;
+        await sendMessage();
+      }else{
+        print("Not recorded");
+      }
+      isRecording.value=false;
+      update();
+    }catch(e){
+      Exception(e);
+    }
+  }
+
+  startAudioPlayback(String path)async{
+    try{
+      AudioService audioService = Get.put(AudioService());
+      audioService.isPlaying.listen((value){
+        isAudioPlaying.value=value;
+        update();
+      });
+      currentAudioPath.value=path;
+      await audioService.startPlaying(path);
+    }catch(e){
+      Exception(e);
+    }
+  }
+
+  cancelAudioRecording()async{
+    AudioService audioService = Get.find();
+    await audioService.cancelRecording();
+    isRecording.value=false;
+    update();
+  }
+
 }

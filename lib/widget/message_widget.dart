@@ -12,8 +12,11 @@ import 'package:skeletonizer/skeletonizer.dart';
 class MessageWidget extends StatelessWidget {
   final Message message;
   final bool isMyMessage;
+  final VoidCallback? playAudio;
+  final bool isPlaying;
+  final String? path;
   const MessageWidget(
-      {super.key, required this.message, required this.isMyMessage});
+      {super.key, required this.message, required this.isMyMessage,this.playAudio,required this.isPlaying,this.path});
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +24,22 @@ class MessageWidget extends StatelessWidget {
       mainAxisAlignment:
           isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        message.messageType == MessageType.text
-            ? messageTypeText(context)
-            : messageTypeImage(context, isMyMessage)
+        chooseMessage(context)
       ],
     );
+  }
+
+  Widget chooseMessage(BuildContext context){
+    switch (message.messageType){
+      case MessageType.text:
+        return messageTypeText(context);
+      case MessageType.image:
+        return messageTypeImage(context, isMyMessage);
+      case MessageType.audio:
+        return messageTypeAudio(isMyMessage);
+      default:
+        return const SizedBox();
+    }
   }
 
   Widget messageTypeText(BuildContext context) {
@@ -121,6 +135,29 @@ class MessageWidget extends StatelessWidget {
                       ),
                     ),
         ),
+      ),
+    );
+  }
+  
+  Widget messageTypeAudio(bool isMyMessage){
+    return Container(
+      height: 65,width: 200,
+      margin: const EdgeInsets.symmetric(horizontal: 5,vertical: 5.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color:isMyMessage?AppColors.myMessageColor.withOpacity(0.5):AppColors.friendMessageColor,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+              onPressed:playAudio??(){},
+              icon:Icon(
+                !isPlaying
+                    ?Icons.play_circle
+                    :path==message.path ?Icons.pause:Icons.play_circle,
+                color: Colors.white,))
+        ],
       ),
     );
   }
