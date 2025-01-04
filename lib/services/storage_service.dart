@@ -50,15 +50,21 @@ class StorageService extends GetxService {
     }
   }
 
+  Future<String> uploadAudioInConversation(String conversationUid,File audio,String messageUid)async{
+    try{
+      return await uploadImage("conversations/$conversationUid/$messageUid", audio);
+    }catch(e){
+      print("Error: $e");
+      throw Exception(e);
+    }
+  }
+
   Future<void> saveImageToLocal(String imageUrl) async {
     try {
-      // Check for storage permission
       bool isGranted = await Permission.storage.isGranted;
       if (!isGranted) {
-        // Request storage permission
         isGranted = await Permission.storage.request().isGranted;
       }
-
       if (isGranted) {
         await downloadProcess(imageUrl);
       } else {
