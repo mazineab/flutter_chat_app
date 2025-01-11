@@ -1,4 +1,4 @@
-import 'enums/sexe.dart';
+import 'enums/gender.dart';
 
 class User {
   String uid;
@@ -8,11 +8,12 @@ class User {
   String email;
   String password;
   DateTime? birthday;
-  Sexe sexe;
+  Gender gender;
   String? phoneNumber;
   String? profilePicture;
   String? bio;
   String? fcmToken;
+  bool? isNotificationEnabled;
 
   User({
       required this.uid,
@@ -22,11 +23,12 @@ class User {
       required this.email,
       required this.password,
       this.birthday,
-      required this.sexe,
+      required this.gender,
       this.phoneNumber,
       this.profilePicture,
       this.bio,
-      this.fcmToken
+      this.fcmToken,
+      this.isNotificationEnabled
       });
 
     User.empty({
@@ -37,7 +39,7 @@ class User {
     this.email = '',
     this.password = '',
     this.birthday,
-    this.sexe = Sexe.male,
+    this.gender = Gender.male,
     this.phoneNumber,
     this.profilePicture,
     this.bio,
@@ -51,12 +53,13 @@ class User {
         lastName: data['lastName'],
         email: data['email'],
         password: data['password'],
-        birthday: DateTime.parse(data['birthday']),
-        sexe: data['sexe']==Sexe.male.value ?Sexe.male :Sexe.female,
+        birthday:data['birthday']!=null? DateTime.parse(data['birthday']):null,
+        gender: data['sexe']==Gender.male.value ?Gender.male :Gender.female,
         phoneNumber: data['phoneNumber'],
         profilePicture: data['profilePicture'],
         bio: data['bio'],
         fcmToken: data['fcmToken'],
+        isNotificationEnabled: data['isNotificationEnabled']
     );
   }
   Map<String,dynamic> toJson(){
@@ -68,13 +71,54 @@ class User {
       'email': email,
       'password': password,
       'birthday': birthday?.toIso8601String(),
-      'sexe': sexe.value,
+      'sexe': gender.value,
       'phoneNumber':phoneNumber,
       'profilePicture': profilePicture,
       'bio': bio,
-      'fcmToken':fcmToken
+      'fcmToken':fcmToken,
+      'isNotificationEnabled':isNotificationEnabled
     };
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is User &&
+        other.uid == uid &&
+        other.docId == docId &&
+        other.name == name &&
+        other.lastName == lastName &&
+        other.email == email &&
+        other.password == password &&
+        other.birthday == birthday &&
+        other.gender == gender &&
+        other.phoneNumber == phoneNumber &&
+        other.profilePicture == profilePicture &&
+        other.bio == bio &&
+        other.fcmToken == fcmToken &&
+        other.isNotificationEnabled == isNotificationEnabled;
+  }
+
+  @override
+  int get hashCode {
+    return uid.hashCode ^
+    docId.hashCode ^
+    name.hashCode ^
+    lastName.hashCode ^
+    email.hashCode ^
+    password.hashCode ^
+    birthday.hashCode ^
+    gender.hashCode ^
+    phoneNumber.hashCode ^
+    profilePicture.hashCode ^
+    bio.hashCode ^
+    fcmToken.hashCode ^
+    isNotificationEnabled.hashCode;
+  }
+
+
+
   
   
 }

@@ -1,4 +1,4 @@
-import 'package:chat_app/data/models/enums/sexe.dart';
+import 'package:chat_app/data/models/enums/gender.dart';
 import 'package:chat_app/widget/custom_profile.dart';
 import 'package:chat_app/widget/gender_card.dart';
 import 'package:flutter/material.dart';
@@ -25,9 +25,6 @@ class SecondSteep extends StatelessWidget {
           CustomTextField(
             label: "Birthday",controller: authController.dateController,
             textFormFieldKey:  null,
-            // validation: (value){
-            //   return AuthValidation.validatePassword(value);
-            // },
             iconPrefix:FontAwesomeIcons.calendarDay,
             onTap: authController.pickDate,
             readOnly: true,
@@ -41,18 +38,18 @@ class SecondSteep extends StatelessWidget {
                   child: GenderCard(
                       groupValue: authController.gender.value,
                       onChanged: (value){
-                        authController.chooseSexe(Sexe.male);
+                        authController.chooseGender(Gender.male);
                       },
-                      value: Sexe.male
+                      value: Gender.male
                   ),
                 ),const SizedBox(width: 5),
                 Expanded(
                   child: GenderCard(
                       groupValue: authController.gender.value,
                       onChanged: (value){
-                        authController.chooseSexe(Sexe.female);
+                        authController.chooseGender(Gender.female);
                       },
-                      value: Sexe.female
+                      value: Gender.female
                   ),
                 ),
 
