@@ -72,23 +72,17 @@ class MainSettingScreen extends StatelessWidget {
         mainWidget: Column(
           children: [
             CustomListTile(
-              onTap: ()=>controller.navigateToEdit(),
+              onTap: controller.navigateToEdit,
               leading: const Icon(FontAwesomeIcons.userPen,size: 20,color: Colors.white),
               title: "Edit Your Informations",
               trailing: const Icon(FontAwesomeIcons.angleRight,size: 20,color: Colors.white),
             ),5.verticalSpace,
             const CustomDivider(),
             5.verticalSpace,
-            const CustomListTile(
+            CustomListTile(
+              onTap: ()=>controller.navigateToPhotos(),
               leading: Icon(FontAwesomeIcons.image,size: 20,color: Colors.white),
               title: "Photo",
-              trailing: Icon(FontAwesomeIcons.angleRight,size: 20,color: Colors.white),
-            ),
-            const CustomDivider(),
-            5.verticalSpace,
-            const CustomListTile(
-              leading: Icon(FontAwesomeIcons.circleHalfStroke,size: 20,color: Colors.white),
-              title: "Theme",
               trailing: Icon(FontAwesomeIcons.angleRight,size: 20,color: Colors.white),
             ),
             const CustomDivider(),

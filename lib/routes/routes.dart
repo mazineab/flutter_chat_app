@@ -6,6 +6,7 @@ import 'package:chat_app/modules/chat/screens/chat_screen.dart';
 import 'package:chat_app/modules/main_home.dart';
 import 'package:chat_app/modules/setting/screens/edit_information.dart';
 import 'package:chat_app/modules/setting/screens/main_setting_screen.dart';
+import 'package:chat_app/modules/setting/screens/received_photos.dart';
 import 'package:chat_app/routes/routes_names.dart';
 import 'package:get/get.dart';
 
@@ -16,6 +17,7 @@ class Routes{
     GetPage(name: RoutesNames.home, page:()=>MainHome(),binding: HomeBinding()),
     GetPage(name: RoutesNames.chatScreen,transition: Transition.rightToLeft,transitionDuration: const Duration(milliseconds: 300) ,page:()=>const ChatScreen(),binding: HomeBinding()),
     GetPage(name: RoutesNames.settingScreen, page: ()=>const MainSettingScreen()),
-    GetPage(name: RoutesNames.editInformationScreen, page: ()=>const EditInformation(),transition: Transition.fadeIn)
+    GetPage(name: RoutesNames.editInformationScreen, page: ()=>const EditInformation(),transition: Transition.fadeIn),
+    GetPage(name: RoutesNames.photosScreen, page: ()=>const ReceivedPhotos(),transition: Transition.fadeIn)
   ];
 }

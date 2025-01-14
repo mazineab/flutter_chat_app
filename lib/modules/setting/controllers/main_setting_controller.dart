@@ -39,6 +39,9 @@ class MainSettingController extends GetxController{
   navigateToEdit(){
     Get.toNamed(RoutesNames.editInformationScreen);
   }
+  navigateToPhotos(){
+    Get.toNamed(RoutesNames.photosScreen);
+  }
 
 
 
