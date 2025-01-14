@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:chat_app/data/models/enums/sexe.dart';
+import 'package:chat_app/data/models/enums/gender.dart';
 import 'package:chat_app/data/models/user.dart' as auth_user;
 import 'package:chat_app/data/repositories/auth_repositorie.dart';
 import 'package:chat_app/routes/routes_names.dart';
@@ -41,10 +41,10 @@ class AuthController extends GetxController{
   //vars
   RxInt currentIndex=0.obs;
   DateTime? _selectedDate;
-  Rx<Sexe> gender=Sexe.male.obs;
+  Rx<Gender> gender=Gender.male.obs;
 
-  chooseSexe(Sexe sexe){
-    gender.value=sexe;
+  chooseGender(Gender newGender){
+    gender.value=newGender;
     update();
   }
 
@@ -60,7 +60,7 @@ class AuthController extends GetxController{
           lastName: lastName.text,
           email: email.text,
           password: password.text,
-          sexe: gender.value,
+          gender: gender.value,
           birthday:DateTime.parse(dateController.text),
           bio: bioController.text,
           phoneNumber: phoneNumController.text,
@@ -150,7 +150,8 @@ class AuthController extends GetxController{
       final auth_user.User user = await authRepositories.getDataOfCurrentUser() ?? auth_user.User.empty();
       if (user.uid.isEmpty) {
         // await logout();
-      } else {
+      }
+      else {
         await authRepositories.updateFcmToken(await notificationService.getFcmToken()??'', user.docId);
         prefs.saveString("userData", jsonEncode(user.toJson()));
       }

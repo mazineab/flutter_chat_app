@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../data/models/enums/sexe.dart';
+import '../data/models/enums/gender.dart';
 
 class GenderCard extends StatelessWidget {
-  final Sexe groupValue; // Sexe type for groupValue
-  final Sexe value; // Sexe type for value
-  final Function(Sexe) onChanged;
+  final Gender groupValue; // Sexe type for groupValue
+  final Gender value; // Sexe type for value
+  final Function(Gender) onChanged;
 
   const GenderCard({
     super.key,
@@ -25,7 +25,7 @@ class GenderCard extends StatelessWidget {
             ? const Color.fromARGB(255, 255, 0, 170).withOpacity(0.3)
             : Colors.lightBlueAccent.withOpacity(0.3),
       ),
-      child: RadioListTile<Sexe>(
+      child: RadioListTile<Gender>(
         activeColor: Colors.white,
         visualDensity: const VisualDensity(horizontal: -4),
         title: Text(value.name, style: GoogleFonts.nunito(color: Colors.white,fontSize: 13,fontWeight: FontWeight.bold)),

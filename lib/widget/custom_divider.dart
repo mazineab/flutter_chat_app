@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 class CustomDivider extends StatelessWidget {
-  const CustomDivider({super.key});
+  final Color? color;
+  const CustomDivider({super.key,this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: EdgeInsets.symmetric(horizontal: 50),
-        child: const Divider(color: Colors.white,height: 1)
+        margin: const EdgeInsets.symmetric(horizontal: 10),
+        child: Divider(color:color?? Colors.grey.withOpacity(0.1),height: 1)
     );
   }
 }

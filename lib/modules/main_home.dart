@@ -1,4 +1,4 @@
-import 'package:chat_app/modules/chat/controllers/main_home_controller.dart';
+import 'package:chat_app/modules/main_home_controller.dart';
 import 'package:chat_app/utils/constants/app_colors.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutter/material.dart';
@@ -13,13 +13,8 @@ class MainHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text("Chatyy",style: TextStyle(color: Colors.white)),
         backgroundColor: AppColors.bgColors,
-        actions: [
-          TextButton(
-              onPressed: ()async{
-            await mainHomeController.logout();
-          }, child:const Text("logout",style: TextStyle(color: Colors.white)))
-        ],
       ),
       bottomNavigationBar: GetBuilder<MainHomeController>(
         builder: (_)=>

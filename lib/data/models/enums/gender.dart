@@ -1,22 +1,22 @@
-enum Sexe {
+enum Gender {
   male,
   female,
 }
 
-extension SexeExtension on Sexe {
+extension SexeExtension on Gender {
   String get toValue {
     switch (this) {
-      case Sexe.male:
+      case Gender.male:
         return 'Male';
-      case Sexe.female:
+      case Gender.female:
         return 'Female';
     }
   }
   String get value{
     switch(this){
-      case Sexe.male:
+      case Gender.male:
         return 'male';
-      case Sexe.female:
+      case Gender.female:
         return 'female';
     }
   }

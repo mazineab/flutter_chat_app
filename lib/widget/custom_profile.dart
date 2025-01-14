@@ -19,7 +19,7 @@ class CustomProfile extends StatelessWidget {
           image: path.isNotEmpty
               ? (!path.startsWith('https')
                 ? DecorationImage(image: FileImage(File(path)), fit: BoxFit.cover)
-                : DecorationImage(image: CachedNetworkImageProvider(path)))
+                : DecorationImage(image: CachedNetworkImageProvider(path),fit: BoxFit.cover))
               : null,
         ),
         child: picker && path.isEmpty

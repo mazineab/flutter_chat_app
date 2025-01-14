@@ -1,5 +1,6 @@
 import 'package:chat_app/data/repositories/chat_repositorie.dart';
 import 'package:chat_app/modules/current_user_controller.dart';
+import 'package:chat_app/utils/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,7 +20,7 @@ class SendMessageDialog {
           child: Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.oldBgColor,
               borderRadius: BorderRadius.circular(16.0),
             ),
             child: Column(
@@ -30,6 +31,7 @@ class SendMessageDialog {
                 const Text(
                   "Send Message",
                   style: TextStyle(
+                    color: Colors.white,
                     fontSize: 20.0,
                     fontWeight: FontWeight.bold,
                   ),

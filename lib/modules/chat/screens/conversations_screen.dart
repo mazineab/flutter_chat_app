@@ -1,4 +1,4 @@
-import 'package:chat_app/widget/custom_conversation_card.dart';
+import 'package:chat_app/widget/ListTiles/custom_conversation_card.dart';
 import 'package:chat_app/widget/lottie_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
