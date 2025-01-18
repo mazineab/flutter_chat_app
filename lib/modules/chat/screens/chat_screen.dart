@@ -1,6 +1,7 @@
 import 'package:chat_app/data/models/enums/message_type.dart';
 import 'package:chat_app/data/models/message.dart';
 import 'package:chat_app/utils/constants/app_colors.dart';
+import 'package:chat_app/widget/custom_divider.dart';
 import 'package:chat_app/widget/message_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,43 +25,87 @@ class ChatScreen extends StatelessWidget {
                     style: const TextStyle(color: Colors.white),
                   )),
               body: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: ListView.builder(
-                      reverse: true,
-                      controller: controller.scrollController,
-                      itemCount: controller.messages.length,
-                      itemBuilder: (context, index) {
-                        Message message = controller.messages[index];
-                        bool isMyMessage = controller
-                                .currentUserController.authUser.value.docId ==
-                            message.senderId;
-                        return MessageWidget(
-                          message: message,
-                          isMyMessage: isMyMessage,
-                          playAudio: message.messageType==MessageType.audio?()=>controller.startAudioPlayback(message.path!):null,
-                          isPlaying: controller.isAudioPlaying.value,
-                          path: controller.currentAudioPath.value,
-                        );
-                      },
+                  Obx(()=> Expanded(
+                      child: ListView.builder(
+                        reverse: true,
+                        itemCount: controller.rxGroupedMessages.keys.length,
+                        itemBuilder: (context, index) {
+                          final date = controller.rxGroupedMessages.keys.elementAt(index);
+                          final messages = controller.rxGroupedMessages[date]!;
+                          return Column(
+                            // crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              /// Section title (Date)
+                              dateWidget(date),
+                              /// Photos grid
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                reverse: true,
+                                controller: controller.scrollController,
+                                itemCount: messages.length,
+                                itemBuilder: (context, index) {
+                                  Message message = messages[index];
+                                  bool isMyMessage = controller
+                                          .currentUserController.authUser.value.docId ==
+                                      message.senderId;
+                                  return MessageWidget(
+                                    message: message,
+                                    isMyMessage: isMyMessage,
+                                    audioFunctions:
+                                    message.messageType==MessageType.audio?
+                                        {"startAudio":()=>controller.startAudioPlayback(message.path!),"pauseAudio":()=>controller.pausePlaying()}
+                                        // ()=>controller.startAudioPlayback(message.path!)
+                                        :null,
+                                    isPlaying: controller.isAudioPlaying.value,
+                                    path: controller.currentAudioPath.value,
+                                  );
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ),
-                  messagePart(
-                      chatController: controller,
-                      textController: controller.textEditingController,
-                      enable: controller.ableToSend.value,
-                      isRecording: controller.isRecording.value,
-                      onChange: controller.checkTextField,
-                      onSend: controller.sendMessage,
-                      onCameraTap: controller.uploadFromGallery,
-                      onRecording: controller.startAudioRecording,
-                      onCancelRecord: controller.cancelAudioRecording,
-                      onSendAudio:controller.finishAudioRecording
+
+                  Obx(()=>
+                     messagePart(
+                        chatController: controller,
+                        textController: controller.textEditingController,
+                        enable: controller.ableToSend.value,
+                        isRecording: controller.isRecording.value,
+                        onChange: controller.checkTextField,
+                        onSend: controller.sendMessage,
+                        onCameraTap: controller.uploadFromGallery,
+                        onRecording: controller.startAudioRecording,
+                        onCancelRecord: controller.cancelAudioRecording,
+                        onSendAudio:controller.finishAudioRecording
+                    ),
                   )
                 ],
               ));
         });
+  }
+
+  Widget dateWidget(String date) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const SizedBox(width:100,child: CustomDivider(color: AppColors.friendMessageColor)),
+        Text(
+          date,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(width:100,child: CustomDivider(color: AppColors.friendMessageColor)),
+      ],
+    );
   }
 
   Widget messagePart(
@@ -86,7 +131,18 @@ class ChatScreen extends StatelessWidget {
           ? recordingWidget(onCancelRecord,onSendAudio)
           : Row(
               children: [
-                iconWidget(onCameraTap, Icons.camera_alt),
+                iconWidget(
+                    !chatController.ableToSendPicture.value
+                        ?(){
+                      ScaffoldMessenger.of(Get.context!).showSnackBar(
+                        const SnackBar(
+                          content: Text("You cannot send pictures right now."),
+                          duration: Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                    :onCameraTap,Icons.camera_alt),
                 const SizedBox(width: 5),
                 Expanded(
                     child: Padding(

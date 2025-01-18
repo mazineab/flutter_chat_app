@@ -1,22 +1,21 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/data/models/enums/message_type.dart';
 import 'package:chat_app/data/models/message.dart';
 import 'package:chat_app/utils/constants/app_colors.dart';
 import 'package:chat_app/widget/image_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class MessageWidget extends StatelessWidget {
   final Message message;
   final bool isMyMessage;
-  final VoidCallback? playAudio;
+  final Map<String,VoidCallback>? audioFunctions;
   final bool isPlaying;
   final String? path;
   const MessageWidget(
-      {super.key, required this.message, required this.isMyMessage,this.playAudio,required this.isPlaying,this.path});
+      {super.key, required this.message, required this.isMyMessage,this.audioFunctions,required this.isPlaying,this.path});
 
   @override
   Widget build(BuildContext context) {
@@ -45,18 +44,14 @@ class MessageWidget extends StatelessWidget {
   Widget messageTypeText(BuildContext context) {
     return Flexible(
       child: Container(
-        constraints:
-            BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width - 80),
+        constraints: BoxConstraints(maxWidth:0.75.sw),
         margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isMyMessage
-              ? AppColors.myMessageColor.withOpacity(0.5)
-              : AppColors.friendMessageColor,
-          borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              bottomLeft: Radius.circular(15),
-              topRight: Radius.circular(15)),
+              ? AppColors.myMessageColor.withOpacity(0.6)
+              : AppColors.friendMessageColor.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(15),
         ),
         child: Text(
           message.messageContent!,
@@ -107,7 +102,7 @@ class MessageWidget extends StatelessWidget {
                   bottomRight: Radius.circular(8),
                   topRight: Radius.circular(8),
                 ),
-          child: message.path!.startsWith('https')
+          child:  message.isUpload!=null && !message.isUpload!
               ? CachedNetworkImage(
                   imageUrl: message.path!,
                   fit: BoxFit.cover,
@@ -121,12 +116,7 @@ class MessageWidget extends StatelessWidget {
                   ),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
                 )
-              : isMyMessage
-                  ? Image.file(
-                      File(message.path!),
-                      fit: BoxFit.cover,
-                    )
-                  : Skeletonizer(
+              : Skeletonizer(
                       enabled: true,
                       child: Container(
                         width: double.infinity,
@@ -141,23 +131,38 @@ class MessageWidget extends StatelessWidget {
   
   Widget messageTypeAudio(bool isMyMessage){
     return Container(
-      height: 65,width: 200,
+      height: 50,width: 50,
       margin: const EdgeInsets.symmetric(horizontal: 5,vertical: 5.0),
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 1),
       decoration: BoxDecoration(
         color:isMyMessage?AppColors.myMessageColor.withOpacity(0.5):AppColors.friendMessageColor,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(30),
       ),
-      child: Row(
-        children: [
-          IconButton(
-              onPressed:playAudio??(){},
-              icon:Icon(
-                !isPlaying
-                    ?Icons.play_circle
-                    :path==message.path ?Icons.pause:Icons.play_circle,
-                color: Colors.white,))
-        ],
+      child: Center(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            message.isUpload!
+                ?const SizedBox(
+                  width: 15,height: 15,
+                    child: CircularProgressIndicator()
+                )
+                :IconButton(
+                  onPressed: !isPlaying
+                      ? (audioFunctions?['startAudio'])
+                      : (audioFunctions?['pauseAudio']),
+                  icon: Icon(
+                    !isPlaying
+                        ? Icons.play_circle
+                        : (path == message.path ? Icons.pause : Icons.play_circle),
+                    color: Colors.white,
+                  ),
+                )
+
+
+          ],
+        ),
       ),
     );
   }

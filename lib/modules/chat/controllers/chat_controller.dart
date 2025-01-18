@@ -15,6 +15,7 @@ import 'package:chat_app/widget/snackBars/snack_bars.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class ChatController extends GetxController{
   final ImagePickerService imagePickerService=Get.put(ImagePickerService());
@@ -25,16 +26,19 @@ class ChatController extends GetxController{
   ScrollController scrollController=ScrollController();
   StreamSubscription<QuerySnapshot>? streamSubscription;
   Rx<File?> rxFile=Rx<File?>(null);
+  RxMap rxGroupedMessages = {}.obs;
 
 
 
   Rx<Conversation> conversation=Conversation().obs;
-  List<Message> messages=<Message>[].obs;
+  // List<Message> messages=<Message>[].obs;
   List<Message> myMessages=<Message>[].obs;
   List<Message> friendMessages=<Message>[].obs;
   TextEditingController textEditingController=TextEditingController();
   RxBool ableToSend=false.obs;
+  RxBool ableToSendPicture=true.obs;
   RxString friendFullName=''.obs;
+  var isUpload=false.obs;
 
   checkTextField(){
     if(textEditingController.text.isNotEmpty){
@@ -42,39 +46,21 @@ class ChatController extends GetxController{
     }else{
       ableToSend.value=false;
     }
-    update();
   }
 
   void startStream(){
     streamSubscription=_chatRepositories.messagesStream(conversation.value.uid!, onData: (List<Message> listMessages){
-      messages.assignAll(listMessages);
-      update();
+      // messages.assignAll(listMessages);
+      groupMessageByDay(listMessages);
     },onError: (error){
       CustomSnackBar.showError("Failed to fetch messages real time. Please try again.");
     });
   }
 
-
-  fetchMessages()async{
-    try{
-      if(conversation.value.uid != null){
-        List<Message> listMessages=await _chatRepositories.fetchMessageOfConversation(conversation.value.uid!);
-        messages.assignAll(listMessages);
-      }else{
-        CustomSnackBar.showError("Failed to fetch messages of this conversation");
-      }
-
-    }catch(e){
-      print(Exception("$e"));
-      CustomSnackBar.showError("Failed to fetch messages. Please try again.");
-    }finally{
-      update();
-    }
-  }
-
   Future<void> sendMessage()async{
     try{
       Message message=Message(
+
         senderId: currentUserController.authUser.value.docId,
         isRead: false,
         createdAt: Timestamp.fromDate(DateTime.now()),
@@ -85,23 +71,27 @@ class ChatController extends GetxController{
       }else if(textEditingController.text.isEmpty && rxFile.value!=null){
         message.messageType=MessageType.image;
         message.messageContent="Photo";
-        message.path=rxFile.value?.path;
+        message.isUpload=true;
       }else if(textEditingController.text.isEmpty && rxAudio.value!=null){
         message.messageType=MessageType.audio;
         message.messageContent="Audio";
-        message.path=rxAudio.value?.path;
+        message.isUpload=true;
       }
 
       bool isSender=currentUserController.authUser.value.docId==conversation.value.senderDocId;
-      await _chatRepositories.sendMessage(message, conversation.value.uid!,isSender);
+      var messageUid=await _chatRepositories.sendMessage(message, conversation.value.uid!,isSender);
       if(message.messageType==MessageType.image){
+        ableToSendPicture.value=false;
         String path=await _storageService.uploadImageInConversation(conversation.value.uid!,rxFile.value!);
-        await _chatRepositories.updateMessagePath(conversation.value.uid!,messages.first.uid!,path);
+        await _chatRepositories.updateMessagePath(conversation.value.uid!,messageUid,path);
       }else if(message.messageType==MessageType.audio){
-        String path=await _storageService.uploadAudioInConversation(conversation.value.uid!,rxAudio.value!,messages.first.uid!);
-        await _chatRepositories.updateMessagePath(conversation.value.uid!,messages.first.uid!,path);
+        ableToSendPicture.value=false;
+        String path=await _storageService.uploadAudioInConversation(conversation.value.uid!,rxAudio.value!,messageUid);
+        await _chatRepositories.updateMessagePath(conversation.value.uid!,messageUid,path);
       }
       textEditingController.clear();
+      ableToSend.value=false;
+      ableToSendPicture.value=true;
       String? fcmToken=await _usersRepositories.getUserFcmToken(isSender
           ?conversation.value.receiverDocId ?? ''
           :conversation.value.senderDocId ?? ''
@@ -129,7 +119,6 @@ class ChatController extends GetxController{
     }else{
       return;
     }
-    update();
   }
 
   String getFriendFullName(Conversation conv)=>
@@ -170,7 +159,6 @@ class ChatController extends GetxController{
       AudioService audioService = Get.put(AudioService());
       isRecording.value = true;
       await audioService.handleRecord();
-      update();
     } catch (e) {
       Exception(e);
     }
@@ -184,8 +172,6 @@ class ChatController extends GetxController{
       if(audioFile!=null){
         rxAudio.value=audioFile;
         await sendMessage();
-      }else{
-        print("Not recorded");
       }
       isRecording.value=false;
       update();
@@ -208,6 +194,13 @@ class ChatController extends GetxController{
     }
   }
 
+  pausePlaying()async{
+    AudioService audioService = Get.find();
+    await audioService.pausePlaying();
+    isAudioPlaying.value=false;
+    update();
+  }
+
   cancelAudioRecording()async{
     AudioService audioService = Get.find();
     await audioService.cancelRecording();
@@ -215,4 +208,18 @@ class ChatController extends GetxController{
     update();
   }
 
+  ///grouped message by date
+  groupMessageByDay(List<Message> messagess) {
+    final Map<String, List<Message>> groupedMessages = {};
+    for (var message in messagess) {
+      final DateTime createdAt = (message.createdAt as Timestamp).toDate();
+      final String date = DateFormat('yyyy-MM-dd').format(createdAt);
+      if (groupedMessages.containsKey(date)) {
+        groupedMessages[date]!.add(message);
+      } else {
+        groupedMessages[date] = [message];
+      }
+    }
+    rxGroupedMessages.assignAll(groupedMessages);
+  }
 }

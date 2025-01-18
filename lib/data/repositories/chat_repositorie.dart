@@ -81,8 +81,9 @@ class ChatRepositories {
   }
 
   /// This function is used to send a message.
-  Future<void> sendMessage(Message message,String conversationUid,bool isSender)async {
+  Future<String> sendMessage(Message message,String conversationUid,bool isSender)async {
     try{
+      String messageUid='';
       Conversation conversation=Conversation(
         lastMessage:message.messageContent,
         lastMessageAt: message.createdAt
@@ -90,10 +91,13 @@ class ChatRepositories {
 
       CollectionReference conversationsCollection= _firebaseFirestore.collection("conversations");
       CollectionReference messagesCollection = conversationsCollection.doc(conversationUid).collection("messages");
-      messagesCollection.add(message.toJson()).then((msgDoc)async{
-        await updateConversation(conversationUid, conversation, isSender);
-        await _updateDocumentWithUid(messagesCollection,msgDoc.id);
-      });
+      DocumentReference msgDoc = await messagesCollection.add(message.toJson());
+      messageUid = msgDoc.id;
+
+      await updateConversation(conversationUid, conversation, isSender);
+      await _updateDocumentWithUid(messagesCollection, msgDoc.id);
+
+      return messageUid;
     }catch(e){
       throw Exception(e);
     }
@@ -104,7 +108,7 @@ class ChatRepositories {
       CollectionReference conversationsCollection= _firebaseFirestore.collection("conversations");
       CollectionReference messagesCollection = conversationsCollection.doc(conversationUid).collection("messages");
       DocumentReference documentReference=messagesCollection.doc(messageUid);
-      await documentReference.update({"path":newPath});
+      await documentReference.update({"path":newPath,'isUpload':false});
     }catch(e){
       throw Exception(e);
     }
