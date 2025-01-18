@@ -43,16 +43,19 @@ class CustomUserListTile extends StatelessWidget {
               ),
             ),
             TextButton(
-                onPressed: () {
-                  SendMessageDialog.show(context,
-                  sndrUid:Get.find<CurrentUserController>().authUser.value.docId,
-                  rcvrUid: user.docId
-                  );
-                },
-                child: const Text(
-                  "Send Message",
-                  style: TextStyle(color: Colors.blueAccent, fontSize: 13),
-                ))
+              onPressed: () {
+                SendMessageDialog.show(
+                  context,
+                  sndrUid: Get.find<CurrentUserController>().authUser.value.docId,
+                  rcvrUid: user.docId,
+                );
+              },
+              child: const Text(
+                "Send Message",
+                style: TextStyle(color: Colors.blueAccent, fontSize: 13),
+              ),
+            )
+
           ],
         ),
       ),

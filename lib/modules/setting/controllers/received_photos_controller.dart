@@ -14,6 +14,7 @@ class ReceivedPhotosController extends GetxController{
     try{
       loading.value=true;
       List<Message> listMessages=await globalRepositories.fetchPhotos(currentUserController.authUser.value.docId);
+      listMessages.sort((a,b)=>a.createdAt!.compareTo(b.createdAt!));
       listPhotos.assignAll(listMessages);
       loading.value=false;
     }catch(e){

@@ -12,6 +12,7 @@ class MainHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset:true,
       appBar: AppBar(
         title: const Text("Chatyy",style: TextStyle(color: Colors.white)),
         backgroundColor: AppColors.bgColors,
