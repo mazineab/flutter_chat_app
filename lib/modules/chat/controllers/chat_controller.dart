@@ -60,7 +60,6 @@ class ChatController extends GetxController{
   Future<void> sendMessage()async{
     try{
       Message message=Message(
-
         senderId: currentUserController.authUser.value.docId,
         isRead: false,
         createdAt: Timestamp.fromDate(DateTime.now()),
@@ -75,22 +74,25 @@ class ChatController extends GetxController{
       }else if(textEditingController.text.isEmpty && rxAudio.value!=null){
         message.messageType=MessageType.audio;
         message.messageContent="Audio";
+        message.audioDuration = audioDurationValue.value != 0 ? audioDurationValue.value : null;
         message.isUpload=true;
       }
 
       bool isSender=currentUserController.authUser.value.docId==conversation.value.senderDocId;
+      textEditingController.clear();
+      ableToSend.value=false;
       var messageUid=await _chatRepositories.sendMessage(message, conversation.value.uid!,isSender);
       if(message.messageType==MessageType.image){
         ableToSendPicture.value=false;
         String path=await _storageService.uploadImageInConversation(conversation.value.uid!,rxFile.value!);
+        rxFile.value=null;
         await _chatRepositories.updateMessagePath(conversation.value.uid!,messageUid,path);
       }else if(message.messageType==MessageType.audio){
         ableToSendPicture.value=false;
         String path=await _storageService.uploadAudioInConversation(conversation.value.uid!,rxAudio.value!,messageUid);
+        rxAudio.value=null;
         await _chatRepositories.updateMessagePath(conversation.value.uid!,messageUid,path);
       }
-      textEditingController.clear();
-      ableToSend.value=false;
       ableToSendPicture.value=true;
       String? fcmToken=await _usersRepositories.getUserFcmToken(isSender
           ?conversation.value.receiverDocId ?? ''
@@ -113,6 +115,16 @@ class ChatController extends GetxController{
 
   void uploadFromGallery()async{
     File? file =await imagePickerService.loadFromGallery();
+    if(file!=null){
+      rxFile.value=file;
+      await sendMessage();
+    }else{
+      return;
+    }
+  }
+
+  void uploadFromCamera()async{
+    File? file=await imagePickerService.loadFromCamera();
     if(file!=null){
       rxFile.value=file;
       await sendMessage();
@@ -147,67 +159,6 @@ class ChatController extends GetxController{
     friendFullName.value=getFriendFullName(conversation.value);
   }
 
-
-
-  /// TODO parts of audio recording and playback functionality
-  Rx<File?> rxAudio=Rx<File?>(null);
-  var isRecording=false.obs;
-  var isAudioPlaying=false.obs;
-  var currentAudioPath=''.obs;
-  startAudioRecording()async {
-    try {
-      AudioService audioService = Get.put(AudioService());
-      isRecording.value = true;
-      await audioService.handleRecord();
-    } catch (e) {
-      Exception(e);
-    }
-  }
-
-
-  finishAudioRecording()async{
-    try{
-      AudioService audioService = Get.find();
-      File? audioFile=await audioService.stopRecording();
-      if(audioFile!=null){
-        rxAudio.value=audioFile;
-        await sendMessage();
-      }
-      isRecording.value=false;
-      update();
-    }catch(e){
-      Exception(e);
-    }
-  }
-
-  startAudioPlayback(String path)async{
-    try{
-      AudioService audioService = Get.put(AudioService());
-      audioService.isPlaying.listen((value){
-        isAudioPlaying.value=value;
-        update();
-      });
-      currentAudioPath.value=path;
-      await audioService.startPlaying(path);
-    }catch(e){
-      Exception(e);
-    }
-  }
-
-  pausePlaying()async{
-    AudioService audioService = Get.find();
-    await audioService.pausePlaying();
-    isAudioPlaying.value=false;
-    update();
-  }
-
-  cancelAudioRecording()async{
-    AudioService audioService = Get.find();
-    await audioService.cancelRecording();
-    isRecording.value=false;
-    update();
-  }
-
   ///grouped message by date
   groupMessageByDay(List<Message> messagess) {
     final Map<String, List<Message>> groupedMessages = {};
@@ -222,4 +173,97 @@ class ChatController extends GetxController{
     }
     rxGroupedMessages.assignAll(groupedMessages);
   }
+
+
+
+  /// TODO parts of audio recording and playback functionality
+  Rx<File?> rxAudio=Rx<File?>(null);
+  var isRecording=false.obs;
+  var isAudioPlaying=false.obs;
+  var currentAudioPath=''.obs;
+  startAudioRecording()async {
+    try {
+      AudioService audioService = Get.put(AudioService());
+      isRecording.value = true;
+      await startAudioWithCounter(true,null);
+      await audioService.handleRecord();
+    } catch (e) {
+      Exception(e);
+    }
+  }
+
+
+  finishAudioRecording()async{
+    try{
+      isRecording.value=false;
+      AudioService audioService = Get.find();
+      File? audioFile=await audioService.stopRecording();
+      if(audioFile!=null){
+        rxAudio.value=audioFile;
+        await sendMessage();
+      }
+      stopCounter();
+    }catch(e){
+      Exception(e);
+    }
+  }
+
+  startAudioPlayback(String path,int audioDuration)async{
+    try{
+      AudioService audioService = Get.put(AudioService());
+      audioService.isPlaying.listen((value){
+        isAudioPlaying.value=value;
+      });
+      currentAudioPath.value=path;
+      await startAudioWithCounter(false,audioDuration);
+      await audioService.startPlaying(path);
+    }catch(e){
+      Exception(e);
+    }
+  }
+
+  pausePlaying()async{
+    AudioService audioService = Get.find();
+    await audioService.pausePlaying();
+    isAudioPlaying.value=false;
+    stopCounter();
+  }
+
+  cancelAudioRecording()async{
+    AudioService audioService = Get.find();
+    await audioService.cancelRecording();
+    countdownTimer.value?.cancel();
+    countdownTimer.value = null;
+    isRecording.value=false;
+  }
+
+
+  Rx<Timer?> countdownTimer = Rx<Timer?>(null);
+  var audioDurationValue=0.obs;
+
+  startAudioWithCounter(bool isRecording,int? audioDuration) async{
+    try{
+      countdownTimer.value?.cancel();
+      countdownTimer.value = Timer.periodic(const Duration(seconds: 1), (timer) async{
+        audioDurationValue.value=countdownTimer.value!.tick;
+        if (isRecording && timer.tick >= 59) {
+          await finishAudioRecording();
+          countdownTimer.value?.cancel();
+          countdownTimer.value = null;
+        }
+        else if(!isRecording && audioDuration!=null && timer.tick >= audioDuration){
+          stopCounter();
+        }
+      });
+    }catch(e){
+      Exception(e);
+    }
+  }
+
+  void stopCounter() {
+    countdownTimer.value?.cancel();
+    countdownTimer.value = null;
+    audioDurationValue.value=0;
+  }
+
 }

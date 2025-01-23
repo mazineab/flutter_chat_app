@@ -9,6 +9,7 @@ class Message {
   bool? isRead;
   String? path;
   bool? isUpload;
+  int? audioDuration;
   Timestamp? createdAt;
 
   Message({
@@ -20,6 +21,7 @@ class Message {
     this.path,
     this.isUpload,
     this.messageType,
+    this.audioDuration
   });
 
   factory Message.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ class Message {
       messageType: getType(json['messageType']),
       path:json['path'] ?? '',
       isUpload: json['isUpload'] ?? false,
+      audioDuration:json['audioDuration'],
       createdAt: json['createdAt'] != null ? json['createdAt'] as Timestamp : null,
     );
   }
@@ -44,6 +47,7 @@ class Message {
       'messageType':messageType?.toValue,
       'path':path,
       'isUpload':isUpload,
+      'audioDuration':audioDuration,
       'createdAt': createdAt,
     };
   }

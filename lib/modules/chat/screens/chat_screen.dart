@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_app/data/models/enums/message_type.dart';
 import 'package:chat_app/data/models/message.dart';
 import 'package:chat_app/utils/constants/app_colors.dart';
@@ -51,16 +53,19 @@ class ChatScreen extends StatelessWidget {
                                   bool isMyMessage = controller
                                           .currentUserController.authUser.value.docId ==
                                       message.senderId;
-                                  return MessageWidget(
-                                    message: message,
-                                    isMyMessage: isMyMessage,
-                                    audioFunctions:
-                                    message.messageType==MessageType.audio?
-                                        {"startAudio":()=>controller.startAudioPlayback(message.path!),"pauseAudio":()=>controller.pausePlaying()}
-                                        // ()=>controller.startAudioPlayback(message.path!)
-                                        :null,
-                                    isPlaying: controller.isAudioPlaying.value,
-                                    path: controller.currentAudioPath.value,
+                                  return Obx(()=>
+                                    MessageWidget(
+                                      message: message,
+                                      isMyMessage: isMyMessage,
+                                      audioFunctions:
+                                      message.messageType==MessageType.audio?
+                                          {"startAudio":()=>controller.startAudioPlayback(message.path!,message.audioDuration!),"pauseAudio":()=>controller.pausePlaying()}
+                                          // ()=>controller.startAudioPlayback(message.path!)
+                                          :null,
+                                      isPlaying: controller.isAudioPlaying,
+                                      path: controller.currentAudioPath.value,
+                                      audioDuration:controller.currentAudioPath.value == message.path? controller.audioDurationValue:null,
+                                    ),
                                   );
                                 },
                               ),
@@ -79,7 +84,8 @@ class ChatScreen extends StatelessWidget {
                         isRecording: controller.isRecording.value,
                         onChange: controller.checkTextField,
                         onSend: controller.sendMessage,
-                        onCameraTap: controller.uploadFromGallery,
+                        onCameraTap: controller.uploadFromCamera,
+                        pickImage: controller.uploadFromGallery,
                         onRecording: controller.startAudioRecording,
                         onCancelRecord: controller.cancelAudioRecording,
                         onSendAudio:controller.finishAudioRecording
@@ -116,6 +122,7 @@ class ChatScreen extends StatelessWidget {
       required VoidCallback onChange,
       required Future<void> Function() onSend,
       required VoidCallback onCameraTap,
+      required VoidCallback pickImage,
       required VoidCallback onRecording,
       required VoidCallback onCancelRecord,
       required VoidCallback onSendAudio
@@ -128,7 +135,7 @@ class ChatScreen extends StatelessWidget {
           color: AppColors.myMessageColor.withOpacity(0.3),
           borderRadius: BorderRadius.circular(50)),
       child: isRecording
-          ? recordingWidget(onCancelRecord,onSendAudio)
+          ? recordingWidget(onCancelRecord,onSendAudio,chatController.audioDurationValue)
           : Row(
               children: [
                 iconWidget(
@@ -136,7 +143,7 @@ class ChatScreen extends StatelessWidget {
                         ?(){
                       ScaffoldMessenger.of(Get.context!).showSnackBar(
                         const SnackBar(
-                          content: Text("You cannot send pictures right now."),
+                          content: Text("You cannot send pictures right now"),
                           duration: Duration(seconds: 2),
                           behavior: SnackBarBehavior.floating,
                         ),
@@ -158,19 +165,19 @@ class ChatScreen extends StatelessWidget {
                     onChanged: (e) => onChange(),
                   ),
                 )),
-                displayedWidget(enable, isRecording, onSend, onRecording)
+                displayedWidget(enable, isRecording, onSend,pickImage, onRecording)
               ],
             ),
     );
   }
 
-  Widget moreWidget({required VoidCallback onRecord}) {
+  Widget moreWidget({required VoidCallback onRecord,required VoidCallback pickImage}) {
     return Padding(
       padding: const EdgeInsets.only(right: 10),
       child: Row(
         children: [
           iconWidget(onRecord, Icons.mic),
-          iconWidget(() {}, Icons.more_vert)
+          iconWidget(pickImage, Icons.photo)
         ],
       ),
     );
@@ -196,7 +203,7 @@ class ChatScreen extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-          width: 80,
+          width: 40,
           decoration: BoxDecoration(
               color: const Color(0xFF3d4354),
               borderRadius: BorderRadius.circular(50)),
@@ -209,25 +216,27 @@ class ChatScreen extends StatelessWidget {
     );
   }
 
-  Widget recordingWidget(VoidCallback onCancelRecord,VoidCallback onSendAudio) {
+  Widget recordingWidget(VoidCallback onCancelRecord,VoidCallback onSendAudio,RxInt counter) {
     return Row(
       children: [
         TextButton(onPressed: onCancelRecord, child: const Text("Cancel")),
-        const Text("00:00", style: TextStyle(color: Colors.white)),
+        Obx(()=> Text(
+            "00:${counter.value.toString().length < 2 ? '0${counter.value}' : counter.value}",
+            style: const TextStyle(color: Colors.white))),
         const Spacer(),
         sendWidget(onSendAudio, Icons.send_sharp)
       ],
     );
   }
 
-  Widget displayedWidget(bool enable, bool isRecord, VoidCallback onSend,
+  Widget displayedWidget(bool enable, bool isRecord, VoidCallback onSend,VoidCallback pickImage,
       VoidCallback onRecording) {
     if (enable) {
       return sendWidget(onSend, Icons.send);
     } else if (!enable && isRecord) {
       return const SizedBox();
     } else {
-      return moreWidget(onRecord: onRecording);
+      return moreWidget(onRecord: onRecording,pickImage: pickImage);
     }
   }
 }

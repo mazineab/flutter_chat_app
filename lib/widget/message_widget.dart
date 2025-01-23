@@ -12,10 +12,14 @@ class MessageWidget extends StatelessWidget {
   final Message message;
   final bool isMyMessage;
   final Map<String,VoidCallback>? audioFunctions;
-  final bool isPlaying;
+  final RxBool isPlaying;
   final String? path;
+  final RxInt? audioDuration;
   const MessageWidget(
-      {super.key, required this.message, required this.isMyMessage,this.audioFunctions,required this.isPlaying,this.path});
+      {super.key,required this.message, required this.isMyMessage,
+        this.audioFunctions,required this.isPlaying,this.path,
+        this.audioDuration,
+});
 
   @override
   Widget build(BuildContext context) {
@@ -128,42 +132,72 @@ class MessageWidget extends StatelessWidget {
       ),
     );
   }
-  
-  Widget messageTypeAudio(bool isMyMessage){
-    return Container(
-      height: 50,width: 50,
-      margin: const EdgeInsets.symmetric(horizontal: 5,vertical: 5.0),
-      padding: const EdgeInsets.symmetric(horizontal: 1),
-      decoration: BoxDecoration(
-        color:isMyMessage?AppColors.myMessageColor.withOpacity(0.5):AppColors.friendMessageColor,
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Center(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            message.isUpload!
-                ?const SizedBox(
-                  width: 15,height: 15,
-                    child: CircularProgressIndicator()
+
+  Widget messageTypeAudio(bool isMyMessage) {
+    return Obx(() {
+      return Container(
+        height: 50,
+        width: 110,
+        margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5.0),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isMyMessage
+              ? AppColors.myMessageColor.withOpacity(0.5)
+              : AppColors.friendMessageColor,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Center(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              audioDurationWidget(),
+              if (message.isUpload!)
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    width: 15,
+                    height: 15,
+                    child: CircularProgressIndicator(),
+                  ),
                 )
-                :IconButton(
-                  onPressed: !isPlaying
+              else
+                IconButton(
+                  onPressed: !isPlaying.value
                       ? (audioFunctions?['startAudio'])
                       : (audioFunctions?['pauseAudio']),
                   icon: Icon(
-                    !isPlaying
+                    !isPlaying.value
                         ? Icons.play_circle
                         : (path == message.path ? Icons.pause : Icons.play_circle),
                     color: Colors.white,
                   ),
-                )
-
-
-          ],
+                ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
+
+
+
+
+  Widget audioDurationWidget(){
+        if(path==message.path && message.audioDuration!=null && isPlaying.value){
+          return counterWidget(audioDuration!.value);
+        }else if(message.audioDuration!=null && !isPlaying.value){
+            return counterWidget(message.audioDuration!);
+          }else if(message.audioDuration!=null && path!=message.path && isPlaying.value){
+          return counterWidget(message.audioDuration!);
+        }
+        return const SizedBox();
+      }
+
+    Widget counterWidget(int value){
+      return Text(
+        "00:${value.toString().length < 2 ? '0$value' : value}",
+        style:const TextStyle(color: Colors.white),
+      );
+    }
 }
