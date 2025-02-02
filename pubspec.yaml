@@ -54,6 +54,8 @@ dependencies:
   flutter_sound: ^9.17.8
   flutter_screenutil: ^5.9.3
   path: ^1.9.0
+  flutter_native_splash: ^2.4.4
+  icons_launcher: ^3.0.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -70,6 +72,24 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
+
+flutter_native_splash:
+  android: true
+  ios: true
+  fullscreen: true
+  color: "#000000"
+  image: "assets/images/talk_space.png"
+
+  android_12:
+    color: "#000000"
+    image: "assets/images/talk_space.png"
+
+#flutter pub run icons_launcher:create
+icons_launcher:
+  image_path: "assets/images/talk_space.png"
+  platforms:
+    android:
+      enable: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
