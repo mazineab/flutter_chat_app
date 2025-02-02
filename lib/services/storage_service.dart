@@ -1,7 +1,6 @@
 import 'dart:io';
-
 import 'package:chat_app/data/repositories/global_repositorie.dart';
-import 'package:chat_app/data/repositories/users_repositorie.dart';
+import 'package:path/path.dart';
 import 'package:chat_app/services/permission_service.dart';
 import 'package:chat_app/widget/snackBars/snack_bars.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -27,23 +26,22 @@ class StorageService extends GetxService {
       final uploadTask = await ref.putFile(image);
       return await uploadTask.ref.getDownloadURL();
     } catch (e) {
-      print("Error uploading image: $e");
       throw Exception("Error uploading image");
     }
   }
 
   Future<String> uploadProfileImage(String userUid, File image) async {
     try {
-      return await uploadImage("$userUid/profilePic", image);
+      return await uploadImage("profiles/$userUid/profilePic", image);
     } catch (e) {
-      print("Error uploading profile image for user $userUid: $e");
       throw Exception("Failed to upload profile image");
     }
   }
 
   Future<String> uploadImageInConversation(String conversationUid,File image)async{
     try{
-      return await uploadImage("conversations/$conversationUid/${image.path}", image);
+      String imageName = basename(image.path);
+      return await uploadImage("conversations/$conversationUid/$imageName", image);
     }catch(e){
       print("Error: $e");
       throw Exception(e);
@@ -85,10 +83,8 @@ class StorageService extends GetxService {
 
       await file.writeAsBytes(response.bodyBytes);
       CustomSnackBar.showSuccess("Image saved successfully at: $filePath");
-      print("Image saved successfully at: $filePath");
     } catch (e) {
       CustomSnackBar.showError("Error while saving the image.");
-      print("Error during file saving: $e");
     }
   }
 }

@@ -16,20 +16,22 @@ class AudioService extends GetxService {
   String playingPath = '';
 
 
-  Future<void> handleRecord() async {
+  Future<bool> handleRecord() async {
     try {
       if(await permissionService.checkPermission(Permission.microphone)){
-        return await startRecording();
+        await startRecording();
+        return true;
       }else{
         if(await permissionService.requestPermission(Permission.microphone)){
-          return await startRecording();
+          await startRecording();
+          return true;
         }else{
-          throw Exception("Permission not granted");
+          return false;
         }
       }
 
     } catch (e) {
-      Exception("Error starting recorder: $e");
+      throw Exception("Error starting recorder");
     }
   }
 

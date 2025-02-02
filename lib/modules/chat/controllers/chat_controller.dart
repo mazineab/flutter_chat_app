@@ -114,7 +114,7 @@ class ChatController extends GetxController{
   }
 
   void uploadFromGallery()async{
-    File? file =await imagePickerService.loadFromGallery();
+    File? file =await imagePickerService.pickImageFromGallery();
     if(file!=null){
       rxFile.value=file;
       await sendMessage();
@@ -124,7 +124,7 @@ class ChatController extends GetxController{
   }
 
   void uploadFromCamera()async{
-    File? file=await imagePickerService.loadFromCamera();
+    File? file=await imagePickerService.pickImageFromCamera();
     if(file!=null){
       rxFile.value=file;
       await sendMessage();
@@ -184,9 +184,12 @@ class ChatController extends GetxController{
   startAudioRecording()async {
     try {
       AudioService audioService = Get.put(AudioService());
-      isRecording.value = true;
-      await startAudioWithCounter(true,null);
-      await audioService.handleRecord();
+      if(await audioService.handleRecord()){
+        isRecording.value = true;
+        await startAudioWithCounter(true,null);
+      }else{
+        CustomSnackBar.showError("To record audio, you must accept the microphone permission.");
+      }
     } catch (e) {
       Exception(e);
     }

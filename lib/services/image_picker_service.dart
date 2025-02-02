@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:chat_app/services/permission_service.dart';
+import 'package:chat_app/widget/snackBars/snack_bars.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -10,11 +11,11 @@ class ImagePickerService {
   
   Future<File?> pickImageFromGallery() async {
     try{
-      bool isGranted=await _permissionService.checkPermission(Permission.photos);
+      bool isGranted=await _permissionService.checkPermission(Permission.storage);
       if(isGranted){
         return await loadFromGallery();
       }else{
-        bool permissionGranted = await _permissionService.requestPermission(Permission.photos);
+        bool permissionGranted = await _permissionService.requestPermission(Permission.storage);
         if (permissionGranted) {
           return await loadFromGallery();
         } else {
@@ -58,6 +59,6 @@ class ImagePickerService {
   }
 
   void _showPermissionDeniedMessage(String permission) {
-    Get.snackbar('Permission Denied', 'Please grant permission to access $permission');
+    CustomSnackBar.showError('Please grant permission to access $permission');
   }
 }
